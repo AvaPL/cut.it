@@ -1,5 +1,6 @@
 package schema
 
+import io.circe.{Decoder, Json}
 import io.circe.generic.auto._
 import io.circe.parser._
 import model.User
@@ -29,13 +30,15 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
                 status
               }
             }
-                 """
+          """
 
         val future = Executor
-          .execute(schema, query, userRepository)
-          .map(_.hcursor.downField("data").get[List[User]]("users") match {
-            case Right(users) => users
-          })
+          .execute(
+            schema = schema,
+            queryAst = query,
+            userContext = userRepository
+          )
+          .map(parseQueryData[List[User]](_, "users"))
         val users = Await.result(future, 10.seconds)
 
         users should be(userRepository.users)
@@ -45,35 +48,79 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
         val query =
           graphql"""
             query($$username: String!) {
-              user(username: $$username){
+              user(username: $$username) {
                 username,
                 status
               }
             }
-                 """
-        val variables =
-          parse("""
+          """
+        val variables = json(
+          """
             {
               "username": "Pafeu"
             }
-          """) match {
-            case Right(variables) => variables
-          }
+          """
+        )
 
         val future = Executor
           .execute(
-            schema,
-            query,
+            schema = schema,
+            queryAst = query,
             variables = variables,
             userContext = userRepository
           )
-          .map(_.hcursor.downField("data").get[Option[User]]("user") match {
-            case Right(user) => user
-          })
+          .map(parseQueryData[Option[User]](_, "user"))
         val user = Await.result(future, 10.seconds)
 
         user should be(userRepository.user("Pafeu"))
       }
+
+      "return empty json for nonexistent user" in {
+        val query =
+          graphql"""
+            query($$username: String!) {
+              user(username: $$username) {
+                username,
+                status
+              }
+            }
+          """
+        val variables = json(
+          """
+            {
+              "username": "Not exists"
+            }
+          """
+        )
+
+        val future = Executor
+          .execute(
+            schema = schema,
+            queryAst = query,
+            variables = variables,
+            userContext = userRepository
+          )
+          .map(parseQueryData[Option[User]](_, "user"))
+        val user = Await.result(future, 10.seconds)
+
+        user should be(None)
+      }
+    }
+  }
+
+  private def parseQueryData[T](json: Json, field: String)(implicit
+      decoder: Decoder[T]
+  ) = {
+    json.hcursor.downField("data").get[T](field) match {
+      case Right(value)  => value
+      case Left(failure) => throw new RuntimeException(failure.message)
+    }
+  }
+
+  private def json(string: String) = {
+    parse(string) match {
+      case Right(variables) => variables
+      case Left(failure)    => throw new RuntimeException(failure.message)
     }
   }
 }
