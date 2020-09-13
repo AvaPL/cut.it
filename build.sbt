@@ -7,5 +7,6 @@ scalaVersion := "2.13.3"
 
 lazy val graphql = project.settings(
   name := "GraphQL",
-  libraryDependencies ++= Kit.scalatest
+  libraryDependencies ++= Kit.scalatest,
+  libraryDependencies ++= Kit.sangria
 )
