@@ -1,7 +1,7 @@
 package schema
 
 import io.circe.generic.auto._
-import io.circe.syntax._
+import io.circe.parser._
 import model.User
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -33,7 +33,9 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
 
         val future = Executor
           .execute(schema, query, userRepository)
-          .map(_.as[List[User]])
+          .map(_.hcursor.downField("data").get[List[User]]("users") match {
+            case Right(users) => users
+          })
         val users = Await.result(future, 10.seconds)
 
         users should be(userRepository.users)
@@ -50,11 +52,13 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
             }
                  """
         val variables =
-          """
+          parse("""
             {
               "username": "Pafeu"
             }
-          """.asJson
+          """) match {
+            case Right(variables) => variables
+          }
 
         val future = Executor
           .execute(
@@ -63,7 +67,9 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
             variables = variables,
             userContext = userRepository
           )
-          .map(_.as[Option[User]])
+          .map(_.hcursor.downField("data").get[Option[User]]("user") match {
+            case Right(user) => user
+          })
         val user = Await.result(future, 10.seconds)
 
         user should be(userRepository.user("Pafeu"))
