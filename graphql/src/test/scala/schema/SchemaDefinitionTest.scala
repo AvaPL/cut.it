@@ -37,7 +37,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
       "return defined users list" in {
 
         val future = query(allUsersQuery)
-          .map(parseQueryData[List[User]](_, "users"))
+          .map(parseData[List[User]](_, "users"))
         val users = Await.result(future, 10.seconds)
 
         users should be(userRepository.users)
@@ -57,7 +57,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
         val variables = usernameVariables("Pafeu")
 
         val future = query(userQuery, variables)
-          .map(parseQueryData[Option[User]](_, "user"))
+          .map(parseData[Option[User]](_, "user"))
         val user = Await.result(future, 10.seconds)
 
         user should be(userRepository.user("Pafeu"))
@@ -67,13 +67,54 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
         val variables = usernameVariables("Nonexistent")
 
         val future = query(userQuery, variables)
-          .map(parseQueryData[Option[User]](_, "user"))
+          .map(parseData[Option[User]](_, "user"))
         val user = Await.result(future, 10.seconds)
 
         user should be(None)
       }
     }
+
+    "received mutation" should {
+
+      val createUserMutation =
+        graphql"""
+            mutation($$userInput: UserInput!) {
+              createUser(userInput: $$userInput) {
+                username,
+                status
+              }
+            }
+          """
+
+      "create user" in {
+        val newUser = User("Adrian", "New here")
+        val variables = userVariables(newUser)
+
+        val future = Executor
+          .execute(
+            schema = schema,
+            queryAst = createUserMutation,
+            variables = variables,
+            userContext = userRepository
+          )
+          .map(parseData[User](_, "createUser"))
+        val user = Await.result(future, 10.seconds)
+
+        user should be(newUser)
+        userRepository.users should contain(newUser)
+      }
+    }
   }
+
+  private def userVariables(user: User) =
+    json(s"""
+      |{
+      | "userInput": {
+      |   "username": "${user.username}",
+      |   "status": "${user.status}"
+      | }
+      |}
+      |""".stripMargin)
 
   private def query(userQuery: Document, variables: Json = Json.obj()) = {
     Executor
@@ -85,7 +126,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
       )
   }
 
-  private def parseQueryData[T](json: Json, field: String)(implicit
+  private def parseData[T](json: Json, field: String)(implicit
       decoder: Decoder[T]
   ) = {
     json.hcursor.downField("data").get[T](field) match {

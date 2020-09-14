@@ -1,9 +1,13 @@
 package schema
 
+import io.circe.Decoder.Result
+import io.circe.Json
 import model.User
 import repository.UserRepository
 import sangria.schema._
 import sangria.macros.derive._
+import io.circe.generic.auto._
+import sangria.marshalling.circe._
 
 object SchemaDefinition {
   val UserType: ObjectType[Unit, User] = deriveObjectType[Unit, User]()
@@ -27,5 +31,23 @@ object SchemaDefinition {
     )
   )
 
-  val schema: Schema[UserRepository, Unit] = Schema(QueryType)
+  val UserInputType: InputObjectType[User] = deriveInputObjectType[User](
+    InputObjectTypeName("UserInput")
+  )
+  implicit val userFromInput: Json => Result[User] = _.as[User]
+  val UserArgument: Argument[User] = Argument("userInput", UserInputType)
+  val MutationType: ObjectType[UserRepository, Unit] = ObjectType(
+    "Mutation",
+    fields[UserRepository, Unit](
+      Field(
+        "createUser",
+        UserType,
+        arguments = UserArgument :: Nil,
+        resolve = c => c.ctx.addUser(c.arg(UserArgument))
+      )
+    )
+  )
+
+  val schema: Schema[UserRepository, Unit] =
+    Schema(QueryType, Some(MutationType))
 }
