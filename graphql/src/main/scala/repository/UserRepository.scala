@@ -21,9 +21,9 @@ case class UserRepository() {
     user
   }
 
-//  def removeUser(username: String): Option[User] = {
-//    val user = usersDb.find(_.username == username)
-//    user.foreach(usersDb.remove)
-//    user
-//  }
+  def deleteUser(username: String): Option[User] = {
+    val user = usersDb.find(_.username == username)
+    user.foreach(usersDb.remove)
+    user
+  }
 }

@@ -36,7 +36,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
 
       "return defined users list" in {
 
-        val future = query(allUsersQuery)
+        val future = request(allUsersQuery)
           .map(parseData[List[User]](_, "users"))
         val users = Await.result(future, 10.seconds)
 
@@ -56,7 +56,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
       "return existing user" in {
         val variables = usernameVariables("Pafeu")
 
-        val future = query(userQuery, variables)
+        val future = request(userQuery, variables)
           .map(parseData[Option[User]](_, "user"))
         val user = Await.result(future, 10.seconds)
 
@@ -66,7 +66,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
       "return null for nonexistent user" in {
         val variables = usernameVariables("Nonexistent")
 
-        val future = query(userQuery, variables)
+        val future = request(userQuery, variables)
           .map(parseData[Option[User]](_, "user"))
         val user = Await.result(future, 10.seconds)
 
@@ -90,33 +90,52 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
         val newUser = User("Adrian", "New here")
         val variables = userVariables(newUser)
 
-        val future = Executor
-          .execute(
-            schema = schema,
-            queryAst = createUserMutation,
-            variables = variables,
-            userContext = userRepository
-          )
+        val future = request(createUserMutation, variables)
           .map(parseData[User](_, "createUser"))
         val user = Await.result(future, 10.seconds)
 
         user should be(newUser)
         userRepository.users should contain(newUser)
       }
+
+      val deleteUserMutation =
+        graphql"""
+            mutation($$username: String!) {
+              deleteUser(username: $$username) {
+                username,
+                status
+              }
+            }
+          """
+
+      "remove user" in {
+        val predefinedUser = User("Mario", "Chillin'")
+        userRepository.addUser(predefinedUser)
+        val variables = usernameVariables(predefinedUser.username)
+
+        val future = request(deleteUserMutation, variables)
+          .map(parseData[Option[User]](_, "deleteUser"))
+        val user = Await.result(future, 10.seconds)
+
+        user.map(_.username) should be(Some(predefinedUser.username))
+        userRepository.user(predefinedUser.username) should be(None)
+      }
+
+      "not remove nonexistent user and return null" in {
+        val usersBefore = userRepository.users
+        val variables = usernameVariables("Nonexistent")
+
+        val future = request(deleteUserMutation, variables)
+          .map(parseData[Option[User]](_, "deleteUser"))
+        val user = Await.result(future, 10.seconds)
+
+        user should be(None)
+        userRepository.users should be(usersBefore)
+      }
     }
   }
 
-  private def userVariables(user: User) =
-    json(s"""
-      |{
-      | "userInput": {
-      |   "username": "${user.username}",
-      |   "status": "${user.status}"
-      | }
-      |}
-      |""".stripMargin)
-
-  private def query(userQuery: Document, variables: Json = Json.obj()) = {
+  private def request(userQuery: Document, variables: Json = Json.obj()) = {
     Executor
       .execute(
         schema = schema,
@@ -127,7 +146,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
   }
 
   private def parseData[T](json: Json, field: String)(implicit
-      decoder: Decoder[T]
+                                                      decoder: Decoder[T]
   ) = {
     json.hcursor.downField("data").get[T](field) match {
       case Right(value)  => value
@@ -136,13 +155,10 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
   }
 
   private def usernameVariables(username: String) = {
-    json(
-      s"""
-            {
-              "username": "$username"
-            }
-      """
-    )
+    json(s"""|{
+             |  "username": "$username"
+             |}
+             |""".stripMargin)
   }
 
   private def json(string: String) = {
@@ -151,4 +167,13 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
       case Left(failure)    => throw new RuntimeException(failure.message)
     }
   }
+
+  private def userVariables(user: User) =
+    json(s"""|{
+             | "userInput": {
+             |   "username": "${user.username}",
+             |   "status": "${user.status}"
+             | }
+             |}
+             |""".stripMargin)
 }

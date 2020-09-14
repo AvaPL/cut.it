@@ -44,6 +44,12 @@ object SchemaDefinition {
         UserType,
         arguments = UserArgument :: Nil,
         resolve = c => c.ctx.addUser(c.arg(UserArgument))
+      ),
+      Field(
+        "deleteUser",
+        OptionType(UserType),
+        arguments = UsernameArgument :: Nil,
+        resolve = c => c.ctx.deleteUser(c.arg(UsernameArgument))
       )
     )
   )
