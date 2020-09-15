@@ -10,7 +10,7 @@ import io.circe.generic.auto._
 import sangria.marshalling.circe._
 
 object SchemaDefinition {
-  val UserType: ObjectType[Unit, User] = deriveObjectType[Unit, User]()
+  val UserType: ObjectType[Unit, User]   = deriveObjectType[Unit, User]()
   val UsernameArgument: Argument[String] = Argument("username", StringType)
   val QueryType: ObjectType[UserRepository, Unit] = ObjectType(
     "Query",
@@ -35,7 +35,7 @@ object SchemaDefinition {
     InputObjectTypeName("UserInput")
   )
   implicit val userFromInput: Json => Result[User] = _.as[User]
-  val UserArgument: Argument[User] = Argument("userInput", UserInputType)
+  val UserArgument: Argument[User]                 = Argument("userInput", UserInputType)
   val MutationType: ObjectType[UserRepository, Unit] = ObjectType(
     "Mutation",
     fields[UserRepository, Unit](

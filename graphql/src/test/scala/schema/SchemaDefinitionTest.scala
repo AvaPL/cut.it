@@ -19,7 +19,7 @@ import scala.concurrent.duration._
 
 class SchemaDefinitionTest extends AnyWordSpec with Matchers {
   val schema: Schema[UserRepository, Unit] = SchemaDefinition.schema
-  val userRepository: UserRepository = UserRepository()
+  val userRepository: UserRepository       = UserRepository()
 
   "SchemaDefinition" when {
     "queried for users" should {
@@ -36,7 +36,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
 
       "return defined users list" in {
 
-        val future = request(allUsersQuery)
+        val future = query(allUsersQuery)
           .map(parseData[List[User]](_, "users"))
         val users = Await.result(future, 10.seconds)
 
@@ -56,7 +56,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
       "return existing user" in {
         val variables = usernameVariables("Pafeu")
 
-        val future = request(userQuery, variables)
+        val future = query(userQuery, variables)
           .map(parseData[Option[User]](_, "user"))
         val user = Await.result(future, 10.seconds)
 
@@ -66,7 +66,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
       "return null for nonexistent user" in {
         val variables = usernameVariables("Nonexistent")
 
-        val future = request(userQuery, variables)
+        val future = query(userQuery, variables)
           .map(parseData[Option[User]](_, "user"))
         val user = Await.result(future, 10.seconds)
 
@@ -87,10 +87,10 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
           """
 
       "create user" in {
-        val newUser = User("Adrian", "New here")
+        val newUser   = User("Adrian", "New here")
         val variables = userVariables(newUser)
 
-        val future = request(createUserMutation, variables)
+        val future = query(createUserMutation, variables)
           .map(parseData[User](_, "createUser"))
         val user = Await.result(future, 10.seconds)
 
@@ -113,7 +113,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
         userRepository.addUser(predefinedUser)
         val variables = usernameVariables(predefinedUser.username)
 
-        val future = request(deleteUserMutation, variables)
+        val future = query(deleteUserMutation, variables)
           .map(parseData[Option[User]](_, "deleteUser"))
         val user = Await.result(future, 10.seconds)
 
@@ -123,9 +123,9 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
 
       "not remove nonexistent user and return null" in {
         val usersBefore = userRepository.users
-        val variables = usernameVariables("Nonexistent")
+        val variables   = usernameVariables("Nonexistent")
 
-        val future = request(deleteUserMutation, variables)
+        val future = query(deleteUserMutation, variables)
           .map(parseData[Option[User]](_, "deleteUser"))
         val user = Await.result(future, 10.seconds)
 
@@ -135,7 +135,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
     }
   }
 
-  private def request(userQuery: Document, variables: Json = Json.obj()) = {
+  private def query(userQuery: Document, variables: Json = Json.obj()) = {
     Executor
       .execute(
         schema = schema,
@@ -146,7 +146,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
   }
 
   private def parseData[T](json: Json, field: String)(implicit
-                                                      decoder: Decoder[T]
+      decoder: Decoder[T]
   ) = {
     json.hcursor.downField("data").get[T](field) match {
       case Right(value)  => value
