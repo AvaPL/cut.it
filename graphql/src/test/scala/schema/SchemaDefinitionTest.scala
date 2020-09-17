@@ -74,7 +74,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
       }
     }
 
-    "received mutation" should {
+    "received users mutation" should {
 
       val createUserMutation =
         graphql"""
@@ -121,7 +121,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
         userRepository.user(predefinedUser.username) should be(None)
       }
 
-      "not remove nonexistent user and return null" in {
+      "return null for nonexistent user" in {
         val usersBefore = userRepository.users
         val variables   = usernameVariables("Nonexistent")
 
