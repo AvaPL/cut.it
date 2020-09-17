@@ -12,10 +12,10 @@ import sangria.ast.Document
 import sangria.execution.Executor
 import sangria.marshalling.circe._
 import sangria.parser.QueryParser
+import sangria.validation.{QueryValidator, Violation}
 import schema.SchemaDefinition
 
 import scala.concurrent.ExecutionContextExecutor
-import scala.util.{Failure, Success}
 
 object Server extends App {
   implicit val system: ActorSystem                        = ActorSystem("graphql")
@@ -35,32 +35,50 @@ object Server extends App {
 
   Http().newServerAt("localhost", 8080).bind(route)
 
-  def graphqlEndpoint(request: Json) = {
-    val query = request.hcursor
-      .downField("query")
-      .as[String] match { // TODO: Cleanup code that uses hcursor
-      case Right(query) => query
-      // TODO: Handle Left
+  def graphqlEndpoint(request: Json) =
+    extractQuery(request) match {
+      case Right((queryAst, operation, variables)) =>
+        validateAndExecuteQuery(queryAst, operation, variables)
+      case Left(exception) => badRequest(exception)
     }
-    QueryParser.parse(query) match {
-      case Success(queryAst) =>
-        val operation = request.hcursor.get[String]("operationName").toOption
-        val variables =
-          request.hcursor
-            .downField("variables")
-            .focus
-            .filter(_.toString != "null")
-            .getOrElse(Json.obj())
-        complete(executeQuery(queryAst, operation, variables))
-      case Failure(exception) =>
-        complete(
-          StatusCodes.BadRequest,
-          ("errors" -> List("message" -> exception.getMessage)).asJson
-        )
-    }
+
+  private def extractQuery(request: Json) = {
+    val query =
+      extractString(request, "query").flatMap(QueryParser.parse(_).toEither)
+    val operation = extractString(request, "operationName").toOption
+    val variables = extractVariables(request)
+    query.map((_, operation, variables))
   }
 
-  def executeQuery(
+  private def extractString(request: Json, field: String) =
+    request.hcursor.get[String](field)
+
+  private def extractVariables(request: Json) =
+    request.hcursor
+      .downField("variables")
+      .focus
+      .filter(_.toString != "null")
+      .getOrElse(Json.obj())
+
+  private def validateAndExecuteQuery(
+      queryAst: Document,
+      operation: Option[String],
+      variables: Json
+  ) =
+    validateQuery(queryAst) match {
+      case violations if violations.isEmpty =>
+        complete(executeQuery(queryAst, operation, variables))
+      case violations => badRequest(violations)
+    }
+
+  private def validateQuery(queryAst: Document) = {
+    QueryValidator.default.validateQuery(
+      SchemaDefinition.schema,
+      queryAst
+    )
+  }
+
+  private def executeQuery(
       queryAst: Document,
       operation: Option[String],
       variables: Json
@@ -73,4 +91,34 @@ object Server extends App {
       operationName = operation
     )
   }
+
+  private def badRequest(violations: Vector[Violation]) =
+    complete(
+      StatusCodes.BadRequest,
+      Json.obj(
+        (
+          "errors",
+          Json.obj(
+            ("message", Json.fromString("Query does not pass validation.")),
+            (
+              "violations",
+              Json.arr(violations.map(v => Json.fromString(v.errorMessage)): _*)
+            )
+          )
+        )
+      )
+    )
+
+  private def badRequest(throwable: Throwable) =
+    complete(
+      StatusCodes.BadRequest,
+      Json.obj(
+        (
+          "errors",
+          Json.obj(
+            ("message", Json.fromString(throwable.getMessage))
+          )
+        )
+      )
+    )
 }
