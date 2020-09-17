@@ -135,7 +135,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
     }
   }
 
-  private def query(userQuery: Document, variables: Json = Json.obj()) = {
+  private def query(userQuery: Document, variables: Json = Json.obj()) =
     Executor
       .execute(
         schema = schema,
@@ -143,30 +143,26 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
         variables = variables,
         userContext = userRepository
       )
-  }
 
   private def parseData[T](json: Json, field: String)(implicit
       decoder: Decoder[T]
-  ) = {
+  ) =
     json.hcursor.downField("data").get[T](field) match {
       case Right(value)  => value
       case Left(failure) => throw new RuntimeException(failure.message)
     }
-  }
 
-  private def usernameVariables(username: String) = {
+  private def usernameVariables(username: String) =
     json(s"""|{
              |  "username": "$username"
              |}
              |""".stripMargin)
-  }
 
-  private def json(string: String) = {
+  private def json(string: String) =
     parse(string) match {
       case Right(variables) => variables
       case Left(failure)    => throw new RuntimeException(failure.message)
     }
-  }
 
   private def userVariables(user: User) =
     json(s"""|{

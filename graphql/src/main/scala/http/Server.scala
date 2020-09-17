@@ -74,18 +74,17 @@ object Server extends App {
       case violations => badRequest(violations)
     }
 
-  private def validateQuery(queryAst: Document) = {
+  private def validateQuery(queryAst: Document) =
     QueryValidator.default.validateQuery(
       SchemaDefinition.schema,
       queryAst
     )
-  }
 
   private def executeQuery(
       queryAst: Document,
       operation: Option[String],
       variables: Json
-  ) = {
+  ) =
     Executor.execute(
       SchemaDefinition.schema,
       queryAst,
@@ -93,7 +92,6 @@ object Server extends App {
       variables = variables,
       operationName = operation
     )
-  }
 
   private def badRequest(violations: Vector[Violation]) =
     complete(
