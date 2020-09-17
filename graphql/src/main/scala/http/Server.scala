@@ -23,19 +23,22 @@ object Server extends App {
 
   val userRepository = UserRepository()
 
-  val route = path("graphql") {
-    post {
-      entity(as[Json]) { request => graphqlEndpoint(request) }
+  val route =
+    path("graphql") {
+      post {
+        entity(as[Json]) { request =>
+          graphqlEndpoint(request)
+        }
+      }
+    } ~ path("graphiql") {
+      get {
+        getFromResource("graphiql.html")
+      }
     }
-  } ~ path("graphiql") {
-    get {
-      getFromResource("graphiql.html")
-    }
-  }
 
   Http().newServerAt("localhost", 8080).bind(route)
 
-  def graphqlEndpoint(request: Json) =
+  private def graphqlEndpoint(request: Json) =
     extractQuery(request) match {
       case Right((queryAst, operation, variables)) =>
         validateAndExecuteQuery(queryAst, operation, variables)
