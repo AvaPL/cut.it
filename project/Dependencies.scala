@@ -12,6 +12,7 @@ object Dependencies {
   val akkaHttp     = "com.typesafe.akka" %% "akka-http"     % Version.akkaHttp
   val akkaHttpCirce =
     "de.heikoseeberger" %% "akka-http-circe" % Version.akkaHttpCirce
+  val scribe = "com.outr" %% "scribe" % Version.scribe
 
   object Version {
     lazy val scalactic     = "3.2.0"
@@ -23,6 +24,7 @@ object Dependencies {
     lazy val akkaStream    = "2.6.8"
     lazy val akkaHttp      = "10.2.0"
     lazy val akkaHttpCirce = "1.34.0"
+    lazy val scribe        = "2.7.12"
   }
 
   object Kit {

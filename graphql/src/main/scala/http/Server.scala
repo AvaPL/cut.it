@@ -8,16 +8,18 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.Json
 import io.circe.syntax._
 import repository.UserRepository
+import runner.Runner
 import sangria.ast.Document
 import sangria.execution.Executor
 import sangria.marshalling.circe._
 import sangria.parser.QueryParser
 import sangria.validation.{QueryValidator, Violation}
 import schema.SchemaDefinition
+import scribe.Level
 
 import scala.concurrent.ExecutionContextExecutor
 
-object Server extends App {
+object Server extends Runner {
   implicit val system: ActorSystem                        = ActorSystem("graphql")
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
@@ -37,6 +39,7 @@ object Server extends App {
     }
 
   Http().newServerAt("localhost", 8080).bind(route)
+  scribe.info("GraphQL server started")
 
   private def graphqlEndpoint(request: Json) =
     extractQuery(request) match {
@@ -84,7 +87,16 @@ object Server extends App {
       queryAst: Document,
       operation: Option[String],
       variables: Json
-  ) =
+  ) = {
+    scribe.debug(
+      s"""Executing query
+         |Query: 
+         |${queryAst.source.getOrElse("")}
+         |Operation: ${operation.getOrElse("")}
+         |Variables: 
+         |$variables
+         |""".stripMargin
+    )
     Executor.execute(
       SchemaDefinition.schema,
       queryAst,
@@ -92,8 +104,13 @@ object Server extends App {
       variables = variables,
       operationName = operation
     )
+  }
 
-  private def badRequest(violations: Vector[Violation]) =
+  private def badRequest(violations: Vector[Violation]) = {
+    scribe.debug(s"""Bad request
+                    |Violations: 
+                    |${violations.map(_.errorMessage).mkString("\n")}
+                    |""".stripMargin)
     complete(
       StatusCodes.BadRequest,
       Json.obj(
@@ -109,8 +126,10 @@ object Server extends App {
         )
       )
     )
+  }
 
-  private def badRequest(throwable: Throwable) =
+  private def badRequest(throwable: Throwable) = {
+    scribe.debug("Bad request", throwable)
     complete(
       StatusCodes.BadRequest,
       Json.obj(
@@ -122,4 +141,5 @@ object Server extends App {
         )
       )
     )
+  }
 }

@@ -18,12 +18,16 @@ case class UserRepository() {
 
   def addUser(user: User): User = {
     usersDb.addOne(user)
+    scribe.debug(s"Added $user to repository")
     user
   }
 
   def deleteUser(username: String): Option[User] = {
     val user = usersDb.find(_.username == username)
-    user.foreach(usersDb.remove)
+    user.foreach { user =>
+      usersDb.remove(user)
+      scribe.debug(s"Removed $user from repository")
+    }
     user
   }
 }
