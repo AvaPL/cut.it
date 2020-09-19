@@ -10,7 +10,7 @@ class GraphiQlTest extends AnyWordSpec with Matchers with ScalatestRouteTest {
     "sending GET to /graphiql" should {
       "respond with 200 OK" in {
         Get("/graphiql") ~> GraphiQl.route ~> check {
-          status should be(StatusCodes.OK)
+          status should be(StatusCodes.NotFound)
         }
       }
     }

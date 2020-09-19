@@ -26,4 +26,4 @@ object Server extends App with Config[ServerConfig] {
 
   Http().newServerAt("localhost", config.port).bind(route)
   scribe.info("GraphQL server started")
-
+}
