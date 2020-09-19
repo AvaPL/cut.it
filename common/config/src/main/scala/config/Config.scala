@@ -2,7 +2,6 @@ package config
 
 import pureconfig.{ConfigReader, ConfigSource}
 
-// TODO: Make a separate module with this trait
 trait Config[T] {
   private var loadedConfig: Option[T] = None
 
