@@ -12,27 +12,40 @@ object Dependencies {
   val akkaHttp     = "com.typesafe.akka" %% "akka-http"     % Version.akkaHttp
   val akkaHttpCirce =
     "de.heikoseeberger" %% "akka-http-circe" % Version.akkaHttpCirce
+  val akkaStreamTestkit =
+    "com.typesafe.akka" %% "akka-stream-testkit" % Version.akkaStreamTestkit
+  val akkaHttpTestkit =
+    "com.typesafe.akka" %% "akka-http-testkit" % Version.akkaHttpTestkit
   val scribe     = "com.outr"              %% "scribe"     % Version.scribe
   val pureconfig = "com.github.pureconfig" %% "pureconfig" % Version.pureconfig
 
   object Version {
-    lazy val scalactic     = "3.2.0"
-    lazy val scalatest     = "3.2.0"
-    lazy val sangria       = "2.0.0"
-    lazy val sangriaCirce  = "1.3.0"
-    lazy val circeGeneric  = "0.13.0"
-    lazy val circeParser   = "0.13.0"
-    lazy val akkaStream    = "2.6.8"
-    lazy val akkaHttp      = "10.2.0"
-    lazy val akkaHttpCirce = "1.34.0"
-    lazy val scribe        = "2.7.12"
-    lazy val pureconfig    = "0.13.0"
+    lazy val scalactic         = "3.2.0"
+    lazy val scalatest         = "3.2.0"
+    lazy val sangria           = "2.0.0"
+    lazy val sangriaCirce      = "1.3.0"
+    lazy val circeGeneric      = "0.13.0"
+    lazy val circeParser       = "0.13.0"
+    lazy val akkaStream        = "2.6.8"
+    lazy val akkaHttp          = "10.2.0"
+    lazy val akkaHttpCirce     = "1.34.0"
+    lazy val akkaStreamTestkit = "2.6.8"
+    lazy val akkaHttpTestkit   = "10.2.0"
+    lazy val scribe            = "2.7.12"
+    lazy val pureconfig        = "0.13.0"
   }
 
   object Kit {
     val scalatest = Seq(scalactic, Dependencies.scalatest)
     val sangria =
       Seq(Dependencies.sangria, sangriaCirce, circeGeneric, circeParser)
-    val akkaHttp = Seq(Dependencies.akkaHttp, akkaStream, akkaHttpCirce)
+    val akkaHttp =
+      Seq(
+        Dependencies.akkaHttp,
+        akkaStream,
+        akkaHttpCirce,
+        akkaStreamTestkit,
+        akkaHttpTestkit
+      )
   }
 }
