@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
+import config.{Config, ServerConfig}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.Json
 import repository.UserRepository
@@ -16,14 +17,17 @@ import schema.SchemaDefinition
 import scribe.Level
 
 import scala.concurrent.ExecutionContextExecutor
+import pureconfig.generic.auto._
 
-object Server extends App {
+object Server extends App with Config[ServerConfig] {
   implicit val system: ActorSystem                        = ActorSystem("graphql")
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
   scribe.Logger.root
     .clearHandlers()
     .withHandler(minimumLevel = Some(Level.Debug))
     .replace()
+
+  override def defaultConfig = ServerConfig(port = 8080)
 
   val userRepository = UserRepository()
 
@@ -40,7 +44,7 @@ object Server extends App {
       }
     }
 
-  Http().newServerAt("localhost", 8080).bind(route)
+  Http().newServerAt("localhost", config.port).bind(route)
   scribe.info("GraphQL server started")
 
   private def graphqlEndpoint(request: Json) =
