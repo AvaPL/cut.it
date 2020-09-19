@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class GraphiQlTest extends AnyWordSpec with Matchers with ScalatestRouteTest {
-  "Server" when {
+  "GraphiQl" when {
     "sending GET to /graphiql" should {
       "respond with 200 OK" in {
         Get("/graphiql") ~> GraphiQl.route ~> check {
