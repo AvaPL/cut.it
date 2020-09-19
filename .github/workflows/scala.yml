@@ -8,14 +8,14 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK 14
+    - name: JDK 14 setup
       uses: actions/setup-java@v1
       with:
         java-version: 14.0.1
-    - name: Run tests
+    - name: Compile
+      run: sbt compile
+    - name: Test
       run: sbt test
