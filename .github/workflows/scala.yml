@@ -19,5 +19,3 @@ jobs:
       run: sbt compile
     - name: Test
       run: sbt test
-    - name: Scalafmt
-      uses: openlawteam/scalafmt-ci@v2.0.2
