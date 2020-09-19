@@ -6,9 +6,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.Json
-import io.circe.syntax._
 import repository.UserRepository
-import runner.Runner
 import sangria.ast.Document
 import sangria.execution.Executor
 import sangria.marshalling.circe._
@@ -19,9 +17,13 @@ import scribe.Level
 
 import scala.concurrent.ExecutionContextExecutor
 
-object Server extends Runner {
+object Server extends App {
   implicit val system: ActorSystem                        = ActorSystem("graphql")
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
+  scribe.Logger.root
+    .clearHandlers()
+    .withHandler(minimumLevel = Some(Level.Debug))
+    .replace()
 
   val userRepository = UserRepository()
 
