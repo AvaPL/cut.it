@@ -24,7 +24,8 @@ object Projects {
       .settings(
         name := "config",
         libraryDependencies += pureconfig,
-        libraryDependencies += scribe % Provided
+        libraryDependencies += scribe % Provided,
+        libraryDependencies ++= Kit.scalatest
       )
 
     lazy val logging = project

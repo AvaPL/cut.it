@@ -14,7 +14,9 @@ class LoggingTest
     with BeforeAndAfterEach
     with ScalatestRouteTest {
 
-  var logging: Logging = new {} with App with Logging {
+  var logging: Logging = newLogging
+
+  private def newLogging: App with Logging = new Object with App with Logging {
     override def enableLoggingServer: Boolean      = false
     override def defaultMinimumLoggingLevel: Level = Error
   }
@@ -66,9 +68,7 @@ class LoggingTest
 
   override protected def afterEach(): Unit =
     try super.afterEach()
-    finally logging = new {} with App with Logging {
-      override def enableLoggingServer: Boolean = false
-    }
+    finally logging = newLogging
 
   private def scribeLevelShouldBe(level: Level) = {
     scribe.Logger.root.includes(level) should be(true)
