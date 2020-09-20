@@ -9,9 +9,10 @@ object Projects {
       libraryDependencies ++= Kit.scalatest,
       libraryDependencies ++= Kit.sangria,
       libraryDependencies ++= Kit.akkaHttp,
-      libraryDependencies += scribe // TODO: Remove after adding logging module
+      libraryDependencies += scribe % Provided
     )
     .dependsOn(Common.config)
+    .dependsOn(Common.logging)
 
   lazy val common = project
     .settings(
@@ -24,6 +25,14 @@ object Projects {
         name := "config",
         libraryDependencies += pureconfig,
         libraryDependencies += scribe % Provided
+      )
+
+    lazy val logging = project
+      .settings(
+        name := "logging",
+        libraryDependencies += scribe,
+        libraryDependencies ++= Kit.akkaHttp,
+        libraryDependencies ++= Kit.scalatest
       )
   }
 }

@@ -161,7 +161,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
   private def json(string: String) =
     parse(string) match {
       case Right(variables) => variables
-      case Left(failure)    => throw new RuntimeException(failure.message)
+      case Left(failure)    => throw failure
     }
 
   private def userVariables(user: User) =
