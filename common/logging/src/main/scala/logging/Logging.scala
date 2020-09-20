@@ -16,7 +16,9 @@ trait Logging {
 
   private implicit val system: ActorSystem = ActorSystem("logging")
 
-  private[logging] val loggingRoute: Route = path("logging") {
+  // Additional final modifier is used because of scope leakage:
+  // https://github.com/scala/bug/issues/11339
+  private[logging] final val loggingRoute = path("logging") {
     post {
       entity(as[ScribeSettings]) { settings =>
         setLoggingSettings(settings)
