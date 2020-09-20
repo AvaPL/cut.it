@@ -1,6 +1,6 @@
 package config
 
-import pureconfig.{ConfigReader, ConfigSource}
+import pureconfig.{ConfigObjectSource, ConfigReader, ConfigSource}
 
 trait Config[T] {
   private var loadedConfig: Option[T] = None
@@ -13,7 +13,7 @@ trait Config[T] {
   }
 
   private def loadConfig(implicit cr: ConfigReader[T]) =
-    ConfigSource.default.load[T] match {
+    configSource.load[T] match {
       case Right(config) =>
         scribe.debug(s"Loaded config for $className")
         config
@@ -26,6 +26,8 @@ trait Config[T] {
 
   private def className =
     this.getClass.getName.dropRight(1) // Removes trailing '$'
+
+  def configSource: ConfigObjectSource = ConfigSource.default
 
   def defaultConfig: T =
     sys.error(s"Default config for $className is undefined")

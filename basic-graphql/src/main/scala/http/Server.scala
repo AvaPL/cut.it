@@ -8,7 +8,6 @@ import http.route.{GraphQl, GraphiQl}
 import logging.Logging
 import pureconfig.generic.auto._
 import repository.UserRepository
-import scribe.Level
 
 import scala.concurrent.ExecutionContextExecutor
 
