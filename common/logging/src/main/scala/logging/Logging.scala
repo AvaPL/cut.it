@@ -16,7 +16,7 @@ trait Logging {
 
   private implicit val system: ActorSystem = ActorSystem("logging")
 
-  private[logging] val route: Route = path("logging") {
+  private[logging] val loggingRoute: Route = path("logging") {
     post {
       entity(as[ScribeSettings]) { settings =>
         setLoggingSettings(settings)
@@ -26,7 +26,7 @@ trait Logging {
 
   setMinimumLevel(defaultMinimumLoggingLevel)
   if (enableLoggingServer) {
-    Http().newServerAt("localhost", 1065).bind(route)
+    Http().newServerAt("localhost", 1065).bind(loggingRoute)
     scribe.info("Logging server started")
   }
 

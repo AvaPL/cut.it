@@ -35,7 +35,7 @@ class LoggingTest
           Post(
             "/logging",
             minimumLevelEntity(level.name)
-          ) ~> logging.route ~> check {
+          ) ~> logging.loggingRoute ~> check {
             status should be(StatusCodes.NoContent)
             scribeLevelShouldBe(level)
           }
@@ -46,7 +46,7 @@ class LoggingTest
           Post(
             "/logging",
             minimumLevelEntity(level.name.toLowerCase.capitalize)
-          ) ~> logging.route ~> check {
+          ) ~> logging.loggingRoute ~> check {
             status should be(StatusCodes.NoContent)
             scribeLevelShouldBe(level)
           }
@@ -56,7 +56,7 @@ class LoggingTest
         Post(
           "/logging",
           minimumLevelEntity("invalid")
-        ) ~> logging.route ~> check {
+        ) ~> logging.loggingRoute ~> check {
           status should be(StatusCodes.BadRequest)
           scribeLevelShouldBe(logging.defaultMinimumLoggingLevel)
         }
