@@ -31,7 +31,8 @@ object Projects {
       .settings(
         name := "logging",
         libraryDependencies += scribe,
-        libraryDependencies ++= Kit.akkaHttp
+        libraryDependencies ++= Kit.akkaHttp,
+        libraryDependencies ++= Kit.scalatest
       )
   }
 }
