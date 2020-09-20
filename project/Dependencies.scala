@@ -40,12 +40,14 @@ object Dependencies {
   object Kit {
     lazy val scalatest = Seq(scalactic, Dependencies.scalatest)
     lazy val sangria =
-      Seq(Dependencies.sangria, sangriaCirce, circeGeneric, circeParser)
+      Seq(Dependencies.sangria, sangriaCirce, circeGeneric, circeParser % Test)
     lazy val akkaHttp =
       Seq(
         Dependencies.akkaHttp,
         akkaStream,
         akkaHttpCirce,
+        circeGeneric,
+        circeParser % Test,
         akkaStreamTestkit,
         akkaHttpTestkit
       )
