@@ -27,3 +27,9 @@ jobs:
         java-version: 14.0.1
     - name: Test
       run: sbt test
+  scalafmt:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: scalafmt-native-formatter
+      uses: AvaPL/scalafmt-native-formatter@v0.1.0
