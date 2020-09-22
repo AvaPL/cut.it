@@ -1,3 +1,4 @@
 package config
 
-case class ServerConfig(port: Int)
+case class ServerConfig(
+port: Int)
