@@ -1,7 +1,7 @@
 import sbt._
 
 name := "cut.it"
-version := "0.1"
+ThisBuild / version := "0.1"
 ThisBuild / scalaVersion := "2.13.3"
 ThisBuild / scalacOptions ++= Scalac.options
 

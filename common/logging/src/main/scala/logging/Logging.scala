@@ -27,7 +27,7 @@ trait Logging {
 
   setMinimumLevel(defaultMinimumLoggingLevel)
   if (enableLoggingServer) {
-    Http().newServerAt("localhost", 1065).bind(loggingRoute)
+    Http().newServerAt("0.0.0.0", 1065).bind(loggingRoute)
     scribe.info("Logging server started")
   }
 
