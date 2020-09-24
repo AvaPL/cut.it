@@ -19,7 +19,7 @@ object Server extends App with Config[ServerConfig] with Logging {
   val route          = GraphQl(userRepository).route ~ GraphiQl.route
 
   Http().newServerAt("0.0.0.0", config.port).bind(route)
-  scribe.info("GraphQL server started")
+  scribe.info(s"GraphQL server started at port ${config.port}")
 
   override def defaultConfig = ServerConfig(port = 8080)
 }
