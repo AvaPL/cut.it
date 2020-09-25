@@ -10,6 +10,25 @@ import io.circe.generic.auto._
 import scribe.Level
 import scribe.Level.{Debug, Error, Info, Trace, Warn}
 
+/**
+  * Trait that allows a class to log messages using scribe. It also starts
+  * a config server at 0.0.0.0:1065 that allows dynamical logging level
+  * change. To change logging level use POST on /logging endpoint.
+  *
+  * Supported logging levels are:
+  *  - trace
+  *  - debug
+  *  - info
+  *  - warn
+  *  - error
+  *
+  * @example {{{
+  * POST /logging
+  * {
+  *   "minimumLevel": "warn"
+  * }
+  * }}}
+  */
 trait Logging {
   this: App =>
 
@@ -25,16 +44,25 @@ trait Logging {
     }
   }
 
-  setMinimumLevel(defaultMinimumLoggingLevel)
+  setMinimumLoggingLevel(defaultMinimumLoggingLevel)
   if (enableLoggingServer) {
     Http().newServerAt("0.0.0.0", 1065).bind(loggingRoute)
     scribe.info("Logging server started")
   }
 
+  def defaultMinimumLoggingLevel: Level = Info
+
+  /**
+    * Determines if the logging server should be started, defaults to `true`. It
+    * is only invoked on init so it should be overridden in derived classes if
+    * other behavior is desired.
+    */
+  def enableLoggingServer: Boolean = true
+
   private def setLoggingSettings(settings: ScribeSettings) = {
     val minimumLevel = parseMinimumLevel(settings.minimumLevel)
     if (minimumLevel.isDefined) {
-      setMinimumLevel(minimumLevel.get)
+      setMinimumLoggingLevel(minimumLevel.get)
       complete(StatusCodes.NoContent)
     } else
       complete(
@@ -53,7 +81,7 @@ trait Logging {
       case _          => None
     }
 
-  private def setMinimumLevel(minimumLevel: Level): Unit = {
+  def setMinimumLoggingLevel(minimumLevel: Level): Unit = {
     scribe.Logger.root
       .clearHandlers()
       .withHandler(minimumLevel = Some(minimumLevel))
@@ -72,8 +100,4 @@ trait Logging {
         )
       )
     )
-
-  def defaultMinimumLoggingLevel: Level = Info
-
-  def enableLoggingServer: Boolean = true
 }
