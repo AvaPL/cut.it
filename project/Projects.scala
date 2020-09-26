@@ -1,12 +1,16 @@
-import sbt._
 import Dependencies._
-import com.typesafe.sbt.SbtNativePackager.Docker
-import com.typesafe.sbt.packager.Keys.{dockerBaseImage, dockerExposedPorts}
+import com.typesafe.sbt.packager.Keys.dockerBaseImage
 import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
-import sbt.Keys.{libraryDependencies, name, version}
+import sbt.Keys.{libraryDependencies, name}
+import sbt._
 
 object Projects {
-  lazy val `basic-graphql` = project
+  lazy val common = project
+    .settings(
+      name := "common"
+    )
+
+  lazy val `basic-graphql` = project.dockerize
     .settings(
       name := "basic-graphql",
       libraryDependencies ++= Kit.scalatest,
@@ -16,15 +20,17 @@ object Projects {
     )
     .dependsOn(Common.config)
     .dependsOn(Common.logging)
-    .enablePlugins(JavaAppPackaging)
-    .settings(
-      dockerBaseImage := "openjdk:14"
-    )
 
-  lazy val common = project
+  lazy val graphql = project.dockerize
     .settings(
-      name := "common"
+      name := "graphql",
+      libraryDependencies ++= Kit.scalatest,
+      libraryDependencies ++= Kit.sangria,
+      libraryDependencies ++= Kit.akkaHttp,
+      libraryDependencies += scribe % Provided
     )
+    .dependsOn(Common.config)
+    .dependsOn(Common.logging)
 
   object Common {
     lazy val config = project
@@ -41,6 +47,14 @@ object Projects {
         libraryDependencies += scribe,
         libraryDependencies ++= Kit.akkaHttp,
         libraryDependencies ++= Kit.scalatest
+      )
+  }
+
+  implicit class ProjectExtensions(val project: Project) extends AnyVal {
+    def dockerize: Project = project
+      .enablePlugins(JavaAppPackaging)
+      .settings(
+        dockerBaseImage := "openjdk:14"
       )
   }
 }
