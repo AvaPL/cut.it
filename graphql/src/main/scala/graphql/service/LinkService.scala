@@ -2,6 +2,7 @@ package graphql.service
 
 import java.time.OffsetDateTime
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 import akka.actor.ActorSystem
 import akka.kafka.scaladsl.Consumer.DrainingControl
@@ -16,27 +17,28 @@ import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.{Source, SourceQueueWithComplete}
 import com.typesafe.config.Config
 import graphql.model.Link
+import io.circe.generic.auto._
+import io.circe.parser.decode
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.{
   StringDeserializer,
   StringSerializer
 }
-import io.circe.syntax._
-import io.circe.generic.auto._
-import io.circe.parser.decode
 
+import scala.concurrent.{Future, Promise}
 import scala.util.Random
 
 case class LinkService(config: Config)(implicit as: ActorSystem) {
 
-  val cutLinkInputFlow: SourceQueueWithComplete[Link] = Source
-    .queue[Link](1000, OverflowStrategy.dropNew)
-    .map { link =>
-      // TODO: Add processing logic
+  private val uriToLinkPromise = new ConcurrentHashMap[String, Promise[Link]]()
+
+  val cutLinkInputFlow: SourceQueueWithComplete[String] = Source
+    .queue[String](1000, OverflowStrategy.dropNew)
+    .map { uri =>
       new ProducerRecord(
         "some-input-topic", // TODO: Assign correct topic
-        link.id,
-        link.asJson.noSpaces
+        uri,
+        uri
       )
     }
     .map { record =>
@@ -53,7 +55,7 @@ case class LinkService(config: Config)(implicit as: ActorSystem) {
   val cutLinkOutputFlow: Consumer.Control = Consumer
     .committableSource(
       ConsumerSettings(config, new StringDeserializer, new StringDeserializer),
-      Subscriptions.topics("some-topic") // TODO: Assign correct topic
+      Subscriptions.topics("some-output-topic") // TODO: Assign correct topic
     )
     .asSourceWithContext(_.committableOffset)
     .map(_.record)
@@ -69,10 +71,11 @@ case class LinkService(config: Config)(implicit as: ActorSystem) {
     .toMat(Committer.sink(CommitterSettings(config)))(DrainingControl.apply)
     .run()
 
-  def cutLink(uri: String): Link = {
-    // TODO: Replace with sending a request message to Kafka
-    val created = OffsetDateTime.now()
-    Link(UUID.randomUUID().toString, uri, created)
+  def cutLink(uri: String): Future[Link] = {
+    val promise = Promise[Link]()
+    uriToLinkPromise.put(uri, promise) // TODO: Use flow instead of map
+    cutLinkInputFlow.offer(uri)        // TODO: Check enqueue result
+    promise.future
   }
 
   def uncutLink(id: String): Option[Link] = {

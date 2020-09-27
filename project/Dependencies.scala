@@ -54,6 +54,7 @@ object Dependencies {
         akkaStreamTestkit,
         akkaHttpTestkit
       )
-    lazy val alpakkaKafka = Seq(akkaStream, akkaStreamKafka)
+    lazy val alpakkaKafka =
+      Seq(akkaStream, akkaStreamKafka, circeGeneric, circeParser)
   }
 }

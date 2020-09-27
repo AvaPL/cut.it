@@ -9,6 +9,9 @@ import sangria.macros.derive._
 import sangria.marshalling.circe._
 import sangria.schema._
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
+
 object SchemaDefinition {
   val LinkType: ObjectType[Unit, Link] = deriveObjectType[Unit, Link](
     ReplaceField(
@@ -43,7 +46,8 @@ object SchemaDefinition {
         LinkType,
         description = Some("Cuts a link and returns it."),
         arguments = UriArgument :: Nil,
-        resolve = c => c.ctx.cutLink(c.arg(UriArgument))
+        resolve =
+          c => Await.result(c.ctx.cutLink(c.arg(UriArgument)), 10.seconds)
       )
     )
   )
