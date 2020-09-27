@@ -27,7 +27,8 @@ object Projects {
       libraryDependencies ++= Kit.scalatest,
       libraryDependencies ++= Kit.sangria,
       libraryDependencies ++= Kit.akkaHttp,
-      libraryDependencies += scribe % Provided
+      libraryDependencies += scribe % Provided,
+      libraryDependencies ++= Kit.alpakkaKafka
     )
     .dependsOn(Common.config)
     .dependsOn(Common.logging)

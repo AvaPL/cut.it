@@ -10,6 +10,8 @@ object Dependencies {
   lazy val circeParser  = "io.circe" %% "circe-parser"  % Version.circeParser
   lazy val akkaStream =
     "com.typesafe.akka" %% "akka-stream" % Version.akkaStream
+  lazy val akkaStreamKafka =
+    "com.typesafe.akka" %% "akka-stream-kafka" % Version.akkaStreamKafka
   lazy val akkaHttp = "com.typesafe.akka" %% "akka-http" % Version.akkaHttp
   lazy val akkaHttpCirce =
     "de.heikoseeberger" %% "akka-http-circe" % Version.akkaHttpCirce
@@ -32,6 +34,7 @@ object Dependencies {
     val akkaHttp          = "10.2.0"
     val akkaHttpCirce     = "1.34.0"
     val akkaStreamTestkit = "2.6.8"
+    val akkaStreamKafka   = "2.0.5"
     val akkaHttpTestkit   = "10.2.0"
     val scribe            = "2.7.12"
     val pureconfig        = "0.13.0"
@@ -51,5 +54,6 @@ object Dependencies {
         akkaStreamTestkit,
         akkaHttpTestkit
       )
+    lazy val alpakkaKafka = Seq(akkaStream, akkaStreamKafka)
   }
 }
