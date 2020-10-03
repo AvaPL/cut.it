@@ -10,3 +10,11 @@ case class Link(
     uri: String,
     created: OffsetDateTime
 )
+
+object Link {
+  def apply(
+      id: String,
+      uri: String,
+      created: OffsetDateTime = OffsetDateTime.now()
+  ): Link = new Link(id, uri, created)
+}

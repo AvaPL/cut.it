@@ -1,87 +1,51 @@
 package graphql.service
 
-import java.time.OffsetDateTime
-import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
+import java.util.Base64
 
+import akka.Done
 import akka.actor.ActorSystem
-import akka.kafka.scaladsl.Consumer.DrainingControl
-import akka.kafka.scaladsl.{Committer, Consumer, Producer}
-import akka.kafka.{
-  CommitterSettings,
-  ConsumerSettings,
-  ProducerSettings,
-  Subscriptions
-}
 import akka.stream.OverflowStrategy
-import akka.stream.scaladsl.{Source, SourceQueueWithComplete}
-import com.typesafe.config.Config
+import akka.stream.scaladsl.{Flow, Sink, Source, SourceQueueWithComplete}
 import graphql.model.Link
 import io.circe.generic.auto._
-import io.circe.parser.decode
+import io.circe.syntax._
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.serialization.{
-  StringDeserializer,
-  StringSerializer
-}
 
-import scala.concurrent.{Future, Promise}
-import scala.util.Random
+import scala.concurrent.Future
 
-case class LinkService(config: Config)(implicit as: ActorSystem) {
+case class LinkService(
+    producerSink: Sink[ProducerRecord[String, String], Future[Done]]
+)(implicit as: ActorSystem) {
 
-  private val uriToLinkPromise = new ConcurrentHashMap[String, Promise[Link]]()
-
-  val cutLinkInputFlow: SourceQueueWithComplete[String] = Source
-    .queue[String](1000, OverflowStrategy.dropNew)
-    .map { uri =>
-      new ProducerRecord(
-        "some-input-topic", // TODO: Assign correct topic
-        uri,
-        uri
-      )
-    }
-    .map { record =>
-      println(record) // TODO: Replace with logging
-      record
-    }
-    .to(
-      Producer.plainSink(
-        ProducerSettings(config, new StringSerializer, new StringSerializer)
-      )
-    )
+  val cutLinkFlow: SourceQueueWithComplete[Link] = Source
+    .queue[Link](1000, OverflowStrategy.dropNew)
+    .map(linkProducerRecord)
+    .via(logRecord)
+    .to(producerSink)
     .run()
 
-  val cutLinkOutputFlow: Consumer.Control = Consumer
-    .committableSource(
-      ConsumerSettings(config, new StringDeserializer, new StringDeserializer),
-      Subscriptions.topics("some-output-topic") // TODO: Assign correct topic
-    )
-    .asSourceWithContext(_.committableOffset)
-    .map(_.record)
-    .map { record =>
-      println(record) // TODO: Replace with logging
-      val id   = record.key
-      val link = decode[Link](record.value)
-      println(s"id: $id, link: $link") // TODO: Add processing logic
-      record
-    }
-    .asSource
-    .map(_._2)
-    .toMat(Committer.sink(CommitterSettings(config)))(DrainingControl.apply)
-    .run()
+  val cutLinkTopic = "cut_link"
 
-  def cutLink(uri: String): Future[Link] = {
-    val promise = Promise[Link]()
-    uriToLinkPromise.put(uri, promise) // TODO: Use flow instead of map
-    cutLinkInputFlow.offer(uri)        // TODO: Check enqueue result
-    promise.future
+  private val base64Encoder = Base64.getUrlEncoder
+
+  def cutLink(uri: String): Link = {
+    val id   = createLinkId(uri)
+    val link = Link(id, uri)
+    cutLinkFlow.offer(link) // TODO: Check enqueue result
+    link
   }
 
-  def uncutLink(id: String): Option[Link] = {
-    // TODO: Replace with sending a request message to Kafka
-    val now     = OffsetDateTime.now()
-    val created = now.minusSeconds(Random.between(0, now.toEpochSecond))
-    Option.when(id != "error")(Link(id, "http://mock.com", created))
+  private def createLinkId(uri: String) = {
+    val hashcode      = uri.hashCode
+    val hashcodeBytes = BigInt(hashcode).toByteArray
+    base64Encoder.encodeToString(hashcodeBytes)
+  }
+
+  private def linkProducerRecord(link: Link) =
+    new ProducerRecord(cutLinkTopic, link.id, link.asJson.noSpaces)
+
+  private def logRecord = Flow[ProducerRecord[String, String]].map { record =>
+    scribe.info(s"Created a link: ${record.value}")
+    record
   }
 }
