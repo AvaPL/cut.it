@@ -21,9 +21,9 @@ object Projects {
     .dependsOn(Common.config)
     .dependsOn(Common.logging)
 
-  lazy val graphql = project.dockerize
+  lazy val `cut-link` = project.dockerize
     .settings(
-      name := "graphql",
+      name := "cut-link",
       libraryDependencies ++= Kit.scalatest,
       libraryDependencies ++= Kit.sangria,
       libraryDependencies ++= Kit.akkaHttp,
