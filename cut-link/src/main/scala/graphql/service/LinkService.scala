@@ -2,7 +2,6 @@ package graphql.service
 
 import java.util.Base64
 
-import akka.Done
 import akka.actor.ActorSystem
 import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.{Flow, Sink, Source, SourceQueueWithComplete}
@@ -11,21 +10,16 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import org.apache.kafka.clients.producer.ProducerRecord
 
-import scala.concurrent.Future
-
-case class LinkService(
-    producerSink: Sink[ProducerRecord[String, String], Future[Done]]
-)(implicit as: ActorSystem) {
-
+case class LinkService(producerSink: Sink[ProducerRecord[String, String], _])(
+    implicit as: ActorSystem
+) {
   val cutLinkFlow: SourceQueueWithComplete[Link] = Source
     .queue[Link](1000, OverflowStrategy.dropNew)
     .map(linkProducerRecord)
     .via(logRecord)
     .to(producerSink)
     .run()
-
-  val cutLinkTopic = "cut_link"
-
+  val cutLinkTopic          = "cut_link"
   private val base64Encoder = Base64.getUrlEncoder
 
   def cutLink(uri: String): Link = {
@@ -38,7 +32,8 @@ case class LinkService(
   private def createLinkId(uri: String) = {
     val hashcode      = uri.hashCode
     val hashcodeBytes = BigInt(hashcode).toByteArray
-    base64Encoder.encodeToString(hashcodeBytes)
+    // Drops '=' chars which are the result of base64 padding
+    base64Encoder.encodeToString(hashcodeBytes).reverse.dropWhile(_ == '=')
   }
 
   private def linkProducerRecord(link: Link) =

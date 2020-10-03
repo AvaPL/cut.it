@@ -23,7 +23,6 @@ object SchemaDefinition {
         )
       )
     )
-
   val LinkType: ObjectType[Unit, Link] = deriveObjectType[Unit, Link](
     ReplaceField(
       "created",
@@ -34,9 +33,7 @@ object SchemaDefinition {
       )
     )
   )
-
   val UriArgument: Argument[String] = Argument("uri", StringType)
-
   val MutationType: ObjectType[LinkService, Unit] = ObjectType(
     "Mutation",
     fields[LinkService, Unit](
@@ -49,7 +46,6 @@ object SchemaDefinition {
       )
     )
   )
-
   val schema: Schema[LinkService, Unit] =
     Schema(QueryType, Some(MutationType))
 }
