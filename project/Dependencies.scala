@@ -24,16 +24,22 @@ object Dependencies {
     "com.github.pureconfig" %% "pureconfig" % Version.pureconfig
 
   object Version {
-    val scalactic         = "3.2.0"
-    val scalatest         = "3.2.0"
+    object Common {
+      val scalatest = "3.2.0"
+      val circe     = "0.13.0"
+      val akka      = "2.6.8"
+    }
+
+    val scalactic         = Common.scalatest
+    val scalatest         = Common.scalatest
     val sangria           = "2.0.0"
     val sangriaCirce      = "1.3.0"
-    val circeGeneric      = "0.13.0"
-    val circeParser       = "0.13.0"
-    val akkaStream        = "2.6.8"
+    val circeGeneric      = Common.circe
+    val circeParser       = Common.circe
+    val akkaStream        = Common.akka
     val akkaHttp          = "10.2.0"
     val akkaHttpCirce     = "1.34.0"
-    val akkaStreamTestkit = "2.6.8"
+    val akkaStreamTestkit = Common.akka
     val akkaStreamKafka   = "2.0.5"
     val akkaHttpTestkit   = "10.2.0"
     val scribe            = "2.7.12"
@@ -55,6 +61,11 @@ object Dependencies {
         akkaHttpTestkit
       )
     lazy val alpakkaKafka =
-      Seq(akkaStream, akkaStreamKafka, circeGeneric, circeParser)
+      Seq(
+        akkaStream,
+        akkaStreamKafka,
+        circeGeneric,
+        circeParser
+      )
   }
 }
