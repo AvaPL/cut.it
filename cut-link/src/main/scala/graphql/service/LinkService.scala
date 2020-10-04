@@ -3,12 +3,15 @@ package graphql.service
 import java.util.Base64
 
 import akka.actor.ActorSystem
-import akka.stream.OverflowStrategy
+import akka.stream.{OverflowStrategy, QueueOfferResult}
+import akka.stream.QueueOfferResult.Enqueued
 import akka.stream.scaladsl.{Flow, Sink, Source, SourceQueueWithComplete}
 import graphql.model.Link
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.apache.kafka.clients.producer.ProducerRecord
+
+import scala.util.{Failure, Success, Try}
 
 case class LinkService(producerSink: Sink[ProducerRecord[String, String], _])(
     implicit as: ActorSystem
@@ -25,7 +28,8 @@ case class LinkService(producerSink: Sink[ProducerRecord[String, String], _])(
   def cutLink(uri: String): Link = {
     val id   = createLinkId(uri)
     val link = Link(id, uri)
-    cutLinkFlow.offer(link) // TODO: Check enqueue result
+    scribe.info(s"Created a link: $link")
+    sendLinkMessage(link)
     link
   }
 
@@ -36,11 +40,26 @@ case class LinkService(producerSink: Sink[ProducerRecord[String, String], _])(
     base64Encoder.encodeToString(hashcodeBytes).reverse.dropWhile(_ == '=')
   }
 
+  private def sendLinkMessage(link: Link): Unit = {
+    val enqueueResult = cutLinkFlow.offer(link)
+    enqueueResult.onComplete(logEnqueueResult)(as.dispatcher)
+  }
+
+  private def logEnqueueResult(result: Try[QueueOfferResult]): Unit =
+    result match {
+      case Success(status) if status == Enqueued =>
+        scribe.debug(s"Successfully enqueued Kafka message")
+      case Success(status) =>
+        scribe.error(s"Failed to enqueue Kafka message: $status")
+      case Failure(exception) =>
+        scribe.error(s"Failed to enqueue Kafka message: $exception")
+    }
+
   private def linkProducerRecord(link: Link) =
     new ProducerRecord(cutLinkTopic, link.id, link.asJson.noSpaces)
 
   private def logRecord = Flow[ProducerRecord[String, String]].map { record =>
-    scribe.info(s"Created a link: ${record.value}")
+    scribe.debug(s"Sending link to Kafka: ${record.value}")
     record
   }
 }

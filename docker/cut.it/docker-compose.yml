@@ -16,5 +16,6 @@ services:
     ports:
       - "9092:9092"
     environment:
+      # TODO: Add creating topics here (maybe also disable auto topic creation)
       KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
