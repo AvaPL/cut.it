@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  compile:
+  compile-and-test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -15,17 +15,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 14.0.1
-    - name: Compile
-      run: sbt compile
-  test:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: JDK 14 setup
-      uses: actions/setup-java@v1
-      with:
-        java-version: 14.0.1
-    - name: Test
+    - name: Compile and test
       run: sbt test
   scalafmt:
     runs-on: ubuntu-latest
