@@ -1,9 +1,0 @@
-version: "3.8"
-services:
-  basic-graphql:
-    image: "basic-graphql:0.1"
-    environment:
-      - BASIC_GRAPHQL_PORT=${BASIC_GRAPHQL_PORT}
-    ports:
-      - "${BASIC_GRAPHQL_PORT}:${BASIC_GRAPHQL_PORT}"
-      - "1065:1065"
