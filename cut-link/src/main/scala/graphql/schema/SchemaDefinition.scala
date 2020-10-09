@@ -29,7 +29,8 @@ object SchemaDefinition {
       Field(
         "created",
         StringType,
-        resolve = _.value.created.format(DateTimeFormatter.RFC_1123_DATE_TIME)
+        description = Some("Link creation date and time"),
+        resolve = _.value.created.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
       )
     )
   )
