@@ -1,26 +1,23 @@
 #!/bin/bash
 
+source common.sh
+
 cd ../
 
 # Process script arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
-  # TODO: Extract cases to functions
-  cut.it | infra) profile=$1 ;; # TODO: Extract profiles to a variable
-  *)
-    echo "Unknown parameter passed: $1"
-    exit 1
-    ;;
+  cut.it | infra) profile=$1 ;;
+  *) unknown_parameter "$1" ;;
   esac
   shift
 done
 
-# Check specified profile
+# Stop containers
 if [ -z "$profile" ]; then
-  echo -e "No profile specified, use one of: [cut.it, infra]"
-  exit 1
+  echo -e "[\e[0;31merror\e[0m] No profile specified. Use one of: [cut.it, infra]"
+else
+  cd docker/"$profile" || exit
+  docker-compose down
+  cd ../../scripts || exit
 fi
-
-cd docker/"$profile" || exit
-docker-compose down
-cd ../../scripts || exit
