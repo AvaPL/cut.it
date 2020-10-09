@@ -3,11 +3,11 @@
 source common.sh
 projects=("cut-link")
 
-cd ../
-
 function build_images() {
   echo "[info] Building Docker images ..."
+  cd ../
   sbt "$(printf "; project %s; docker:publishLocal" "${projects[@]}")"
+  cd scripts || exit
 }
 
 # Process script arguments
@@ -24,7 +24,7 @@ done
 if [ -z "$profile" ]; then
   echo -e "[\e[1;33mwarning\e[0m] No profile specified. If you want to also start the app use one of: [cut.it, infra]"
 else
-  cd docker/"$profile" || exit
+  cd ../docker/"$profile" || exit
   docker-compose up -d
   cd ../../scripts || exit
 fi
