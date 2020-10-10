@@ -1,4 +1,4 @@
-package graphql.service
+package cut.link.service
 
 import java.util.Base64
 
@@ -6,7 +6,7 @@ import akka.actor.ActorSystem
 import akka.stream.{OverflowStrategy, QueueOfferResult}
 import akka.stream.QueueOfferResult.Enqueued
 import akka.stream.scaladsl.{Flow, Sink, Source, SourceQueueWithComplete}
-import graphql.model.Link
+import cut.link.model.Link
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.apache.kafka.clients.producer.ProducerRecord

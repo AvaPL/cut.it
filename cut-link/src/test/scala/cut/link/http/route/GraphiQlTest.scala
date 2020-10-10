@@ -1,4 +1,4 @@
-package graphql.http.route
+package cut.link.http.route
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest

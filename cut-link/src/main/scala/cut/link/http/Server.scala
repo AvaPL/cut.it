@@ -1,12 +1,12 @@
-package graphql.http
+package cut.link.http
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import config.Config
-import graphql.config.{KafkaConfig, ServerConfig}
-import graphql.http.route.{GraphQl, GraphiQl}
-import graphql.service.LinkService
+import cut.link.config.{KafkaConfig, ServerConfig}
+import cut.link.http.route.{GraphQl, GraphiQl}
+import cut.link.service.LinkService
 import logging.Logging
 import pureconfig.generic.auto._
 

@@ -1,4 +1,4 @@
-package graphql.model
+package cut.link.model
 
 import java.time.OffsetDateTime
 

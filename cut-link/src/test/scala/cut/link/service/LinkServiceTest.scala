@@ -1,11 +1,11 @@
-package graphql.service
+package cut.link.service
 
 import java.time.OffsetDateTime
 
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.Sink
 import akka.testkit.TestProbe
-import graphql.model.Link
+import cut.link.model.Link
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec

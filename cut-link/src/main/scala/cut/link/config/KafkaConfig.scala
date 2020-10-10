@@ -1,4 +1,4 @@
-package graphql.config
+package cut.link.config
 
 import akka.actor.ActorSystem
 import akka.kafka.ProducerSettings

@@ -1,9 +1,9 @@
-package graphql.schema
+package cut.link.schema
 
 import java.time.format.DateTimeFormatter
 
-import graphql.model.Link
-import graphql.service.LinkService
+import cut.link.model.Link
+import cut.link.service.LinkService
 import io.circe.generic.auto._
 import sangria.macros.derive._
 import sangria.marshalling.circe._

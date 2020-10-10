@@ -1,9 +1,9 @@
-package graphql.http.route
+package cut.link.http.route
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.stream.scaladsl.Sink
-import graphql.service.LinkService
+import cut.link.service.LinkService
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 

@@ -33,6 +33,18 @@ object Projects {
     .dependsOn(Common.config)
     .dependsOn(Common.logging)
 
+  lazy val `link-store` = project.dockerize
+    .settings(
+      name := "link-store",
+      libraryDependencies ++= Kit.scalatest,
+      libraryDependencies ++= Kit.sangria,
+      libraryDependencies ++= Kit.akkaHttp,
+      libraryDependencies += scribe % Provided,
+      libraryDependencies ++= Kit.alpakkaKafka
+    )
+    .dependsOn(Common.config)
+    .dependsOn(Common.logging)
+
   object Common {
     lazy val config = project
       .settings(

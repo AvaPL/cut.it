@@ -1,11 +1,11 @@
-package graphql.http.route
+package cut.link.http.route
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import cut.link.schema.SchemaDefinition
+import cut.link.service.LinkService
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import graphql.schema.SchemaDefinition
-import graphql.service.LinkService
 import io.circe.Json
 import sangria.ast.Document
 import sangria.execution.Executor
