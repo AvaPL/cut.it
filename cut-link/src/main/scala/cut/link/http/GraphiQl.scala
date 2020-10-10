@@ -1,4 +1,4 @@
-package cut.link.http.route
+package cut.link.http
 
 import akka.http.scaladsl.server.Directives.{get, getFromResource, path}
 import akka.http.scaladsl.server.Route

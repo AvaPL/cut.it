@@ -11,7 +11,7 @@ case class KafkaConfig(bootstrapServers: String) {
   def kafkaProducer(implicit
       system: ActorSystem
   ): Sink[ProducerRecord[String, String], Object] =
-    createSink(producerSettings)
+    Producer.plainSink(producerSettings)
 
   private def producerSettings(implicit system: ActorSystem) =
     ProducerSettings(
@@ -21,20 +21,4 @@ case class KafkaConfig(bootstrapServers: String) {
     ).withBootstrapServers(
       bootstrapServers
     ) // TODO: Replace with discovery in the future
-
-  private def createSink(producerSettings: ProducerSettings[String, String]) =
-    if (bootstrapServers.isBlank) {
-      scribe.error(
-        "No Kafka bootstrap servers provided, messages won't be sent"
-      )
-      ignoreMessagesSink
-    } else
-      Producer.plainSink(producerSettings)
-
-  private def ignoreMessagesSink =
-    Flow[ProducerRecord[String, String]].toMat(
-      Sink.foreach(_ =>
-        scribe.warn(s"Kafka message not sent, the producer is missing")
-      )
-    )(Keep.right)
 }

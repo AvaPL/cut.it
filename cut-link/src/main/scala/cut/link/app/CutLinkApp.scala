@@ -1,18 +1,18 @@
-package cut.link.http
+package cut.link.app
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import config.Config
-import cut.link.config.{KafkaConfig, ServerConfig}
-import cut.link.http.route.{GraphQl, GraphiQl}
+import cut.link.config.{KafkaConfig, CutLinkConfig}
+import cut.link.http.{GraphQl, GraphiQl}
 import cut.link.service.LinkService
 import logging.Logging
 import pureconfig.generic.auto._
 
 import scala.concurrent.ExecutionContextExecutor
 
-object Server extends App with Config[ServerConfig] with Logging {
+object CutLinkApp extends App with Config[CutLinkConfig] with Logging {
   implicit val system: ActorSystem                        = ActorSystem("cut-link")
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
@@ -23,5 +23,5 @@ object Server extends App with Config[ServerConfig] with Logging {
   scribe.info(s"cut-link server started at port ${config.port}")
 
   override def defaultConfig =
-    ServerConfig(port = 8080, KafkaConfig(bootstrapServers = ""))
+    CutLinkConfig(port = 8080, KafkaConfig(bootstrapServers = ""))
 }

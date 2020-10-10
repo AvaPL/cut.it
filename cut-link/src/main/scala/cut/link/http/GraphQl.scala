@@ -1,4 +1,4 @@
-package cut.link.http.route
+package cut.link.http
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._

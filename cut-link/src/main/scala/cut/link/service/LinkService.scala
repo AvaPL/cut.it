@@ -16,6 +16,7 @@ import scala.util.{Failure, Success, Try}
 case class LinkService(producerSink: Sink[ProducerRecord[String, String], _])(
     implicit as: ActorSystem
 ) {
+  // TODO: Move flow to a separate class
   val cutLinkFlow: SourceQueueWithComplete[Link] = Source
     .queue[Link](1000, OverflowStrategy.dropNew)
     .map(linkProducerRecord)
