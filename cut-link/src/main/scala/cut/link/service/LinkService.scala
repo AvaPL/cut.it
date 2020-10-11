@@ -13,7 +13,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 
 import scala.util.{Failure, Success, Try}
 
-case class LinkService(producerSink: Sink[ProducerRecord[String, String], _])(
+case class LinkService(linkSink: Sink[ProducerRecord[String, String], _])(
     implicit as: ActorSystem
 ) {
   // TODO: Move flow to a separate class
@@ -21,7 +21,7 @@ case class LinkService(producerSink: Sink[ProducerRecord[String, String], _])(
     .queue[Link](1000, OverflowStrategy.dropNew)
     .map(linkProducerRecord)
     .via(logRecord)
-    .to(producerSink)
+    .to(linkSink)
     .run()
   val cutLinkTopic          = "cut_link"
   private val base64Encoder = Base64.getUrlEncoder

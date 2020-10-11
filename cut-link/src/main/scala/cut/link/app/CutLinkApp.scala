@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import config.Config
-import cut.link.config.{KafkaConfig, CutLinkConfig}
+import cut.link.config.CutLinkConfig
 import cut.link.http.{GraphQl, GraphiQl}
 import cut.link.service.LinkService
 import logging.Logging
@@ -21,7 +21,4 @@ object CutLinkApp extends App with Config[CutLinkConfig] with Logging {
 
   Http().newServerAt("0.0.0.0", config.port).bind(route)
   scribe.info(s"cut-link server started at port ${config.port}")
-
-  override def defaultConfig =
-    CutLinkConfig(port = 8080, KafkaConfig(bootstrapServers = ""))
 }
