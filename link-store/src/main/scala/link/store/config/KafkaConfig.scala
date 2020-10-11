@@ -6,7 +6,7 @@ import akka.kafka.scaladsl.Consumer
 import akka.kafka.scaladsl.Consumer.Control
 import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.stream.scaladsl.SourceWithContext
-import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 import org.apache.kafka.common.serialization.StringDeserializer
 
 case class KafkaConfig(bootstrapServers: String) {
@@ -28,6 +28,7 @@ case class KafkaConfig(bootstrapServers: String) {
       new StringDeserializer,
       new StringDeserializer
     ).withGroupId("link_store")
+      .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
       .withBootstrapServers(
         bootstrapServers
       ) // TODO: Replace with discovery in the future
