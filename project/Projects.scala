@@ -41,7 +41,8 @@ object Projects {
       libraryDependencies ++= Kit.sangria,
       libraryDependencies ++= Kit.akkaHttp,
       libraryDependencies += scribe % Provided,
-      libraryDependencies ++= Kit.alpakkaKafka
+      libraryDependencies ++= Kit.alpakkaKafka,
+      libraryDependencies ++= Kit.elastic4s
     )
     .dependsOn(Common.links)
     .dependsOn(Common.config)

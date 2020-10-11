@@ -13,3 +13,7 @@ services:
       KAFKA_LISTENERS: PLAINTEXT://:9092
       KAFKA_ADVERTISED_LISTENERS: ${KAFKA_ADVERTISED_LISTENERS}
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  elasticsearch:
+    image: bitnami/elasticsearch
+    ports:
+      - "9200:9200"
