@@ -2,6 +2,7 @@ package cut.link.schema
 
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.Sink
+import cut.link.flow.LinkMessageFlow
 import cut.link.model.Link
 import cut.link.service.LinkService
 import io.circe.generic.auto._
@@ -23,7 +24,8 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
   implicit val system: ActorSystem = ActorSystem("test")
 
   val schema: Schema[LinkService, Unit] = SchemaDefinition.schema
-  val linkService: LinkService          = LinkService(Sink.ignore)
+  val ignoreFlow: LinkMessageFlow       = LinkMessageFlow(Sink.ignore)
+  val linkService: LinkService          = LinkService(ignoreFlow)
 
   "SchemaDefinition" when {
     "received cut link mutation" should {

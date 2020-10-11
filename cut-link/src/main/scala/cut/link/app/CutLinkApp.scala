@@ -5,6 +5,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import config.Config
 import cut.link.config.CutLinkConfig
+import cut.link.flow.LinkMessageFlow
 import cut.link.http.{GraphQl, GraphiQl}
 import cut.link.service.LinkService
 import logging.Logging
@@ -16,8 +17,9 @@ object CutLinkApp extends App with Config[CutLinkConfig] with Logging {
   implicit val system: ActorSystem                        = ActorSystem("cut-link")
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-  val linkService = LinkService(config.kafka.kafkaProducer)
-  val route       = GraphQl(linkService).route ~ GraphiQl.route
+  val linkMessageFlow = LinkMessageFlow(config.kafka.kafkaProducer)
+  val linkService     = LinkService(linkMessageFlow)
+  val route           = GraphQl(linkService).route ~ GraphiQl.route
 
   Http().newServerAt("0.0.0.0", config.port).bind(route)
   scribe.info(s"cut-link server started at port ${config.port}")

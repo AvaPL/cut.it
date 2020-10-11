@@ -30,6 +30,7 @@ object Projects {
       libraryDependencies += scribe % Provided,
       libraryDependencies ++= Kit.alpakkaKafka
     )
+    .dependsOn(Common.links)
     .dependsOn(Common.config)
     .dependsOn(Common.logging)
 
@@ -42,6 +43,7 @@ object Projects {
       libraryDependencies += scribe % Provided,
       libraryDependencies ++= Kit.alpakkaKafka
     )
+    .dependsOn(Common.links)
     .dependsOn(Common.config)
     .dependsOn(Common.logging)
 
@@ -60,6 +62,11 @@ object Projects {
         libraryDependencies += scribe,
         libraryDependencies ++= Kit.akkaHttp,
         libraryDependencies ++= Kit.scalatest
+      )
+
+    lazy val links = project
+      .settings(
+        name := "links"
       )
   }
 

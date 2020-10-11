@@ -1,9 +1,10 @@
 import sbt._
 
 object Dependencies {
-  lazy val scalactic = "org.scalactic"       %% "scalactic" % Version.scalactic % Test
-  lazy val scalatest = "org.scalatest"       %% "scalatest" % Version.scalatest % Test
-  lazy val sangria   = "org.sangria-graphql" %% "sangria"   % Version.sangria
+  lazy val scalactic = "org.scalactic" %% "scalactic" % Version.scalactic % Test
+  lazy val scalatest = "org.scalatest" %% "scalatest" % Version.scalatest % Test
+  lazy val sangriaGraphql =
+    "org.sangria-graphql" %% "sangria" % Version.sangriaGraphql
   lazy val sangriaCirce =
     "org.sangria-graphql" %% "sangria-circe" % Version.sangriaCirce
   lazy val circeGeneric = "io.circe" %% "circe-generic" % Version.circeGeneric
@@ -32,7 +33,7 @@ object Dependencies {
 
     val scalactic         = Common.scalatest
     val scalatest         = Common.scalatest
-    val sangria           = "2.0.0"
+    val sangriaGraphql    = "2.0.0"
     val sangriaCirce      = "1.3.0"
     val circeGeneric      = Common.circe
     val circeParser       = Common.circe
@@ -49,7 +50,12 @@ object Dependencies {
   object Kit {
     lazy val scalatest = Seq(scalactic, Dependencies.scalatest)
     lazy val sangria =
-      Seq(Dependencies.sangria, sangriaCirce, circeGeneric, circeParser % Test)
+      Seq(
+        Dependencies.sangriaGraphql,
+        sangriaCirce,
+        circeGeneric,
+        circeParser % Test
+      )
     lazy val akkaHttp =
       Seq(
         Dependencies.akkaHttp,
