@@ -1,5 +1,5 @@
 package links.kafka
 
-object Topics {
+object Topic {
   val cutLinkTopic = "cut_link"
 }

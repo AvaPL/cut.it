@@ -7,7 +7,7 @@ import akka.stream.{OverflowStrategy, QueueOfferResult}
 import cut.link.model.Link
 import io.circe.generic.auto._
 import io.circe.syntax._
-import links.kafka.Topics
+import links.kafka.Topic
 import org.apache.kafka.clients.producer.ProducerRecord
 
 import scala.util.{Failure, Success, Try}
@@ -38,7 +38,7 @@ case class LinkMessageFlow(linkSink: Sink[ProducerRecord[String, String], _])(
     }
 
   private def linkProducerRecord(link: Link) =
-    new ProducerRecord(Topics.cutLinkTopic, link.id, link.asJson.noSpaces)
+    new ProducerRecord(Topic.cutLinkTopic, link.id, link.asJson.noSpaces)
 
   private def logRecord = Flow[ProducerRecord[String, String]].map { record =>
     scribe.debug(s"Sending link to Kafka: ${record.value}")
