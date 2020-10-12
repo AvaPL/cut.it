@@ -15,7 +15,7 @@ import scala.util.{Failure, Success, Try}
 case class LinkMessageFlow(linkSink: Sink[ProducerRecord[String, String], _])(
     implicit as: ActorSystem
 ) {
-  val cutLinkFlow: SourceQueueWithComplete[Link] = Source
+  private val linkQueue: SourceQueueWithComplete[Link] = Source
     .queue[Link](1000, OverflowStrategy.dropNew)
     .map(linkProducerRecord)
     .via(logRecord)
@@ -23,7 +23,7 @@ case class LinkMessageFlow(linkSink: Sink[ProducerRecord[String, String], _])(
     .run()
 
   def sendLinkMessage(link: Link): Unit = {
-    val enqueueResult = cutLinkFlow.offer(link)
+    val enqueueResult = linkQueue.offer(link)
     enqueueResult.onComplete(logEnqueueResult)(as.dispatcher)
   }
 
