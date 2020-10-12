@@ -13,9 +13,12 @@ import link.store.config.ElasticConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 
 case class ElasticConnector(config: ElasticConfig)(implicit as: ActorSystem) {
-  val client: ElasticClient = ElasticClient(
-    AkkaHttpClient(AkkaHttpClientSettings(hosts = config.hostsSeq))
-  )
+  val client: ElasticClient = {
+    val hosts              = config.hosts.split(',').toSeq
+    val httpClientSettings = AkkaHttpClientSettings(hosts)
+    val httpClient         = AkkaHttpClient(httpClientSettings)
+    ElasticClient(httpClient)
+  }
 
   def bulkIndexConsumerRecordFlow(index: String): Flow[
     (ConsumerRecord[String, String], CommittableOffset),
@@ -31,9 +34,12 @@ case class ElasticConnector(config: ElasticConfig)(implicit as: ActorSystem) {
       recordsOffsets: Seq[(ConsumerRecord[String, String], CommittableOffset)]
   ) = recordsOffsets.unzip match {
     case (records, offsets) =>
-      val documents     = records.map(_.value)
-      val indexRequests = documents.map(indexInto(index).doc(_))
-      val lastOffset    = offsets.last
+      val documents = records.map(record => (record.key, record.value))
+      // TODO: Don't index already existing ids
+      val indexRequests = documents.map { case (id, document) =>
+        indexInto(index).withId(id).doc(document)
+      }
+      val lastOffset = offsets.last
       (indexRequests, lastOffset)
   }
 
@@ -53,7 +59,16 @@ case class ElasticConnector(config: ElasticConfig)(implicit as: ActorSystem) {
       case Right(result) =>
         if (result.hasFailures)
           sys.error(s"Request result contained failures: ${result.failures}")
-        scribe.info(s"Saved consumer records to Elasticsearch: $result")
+        logResponse(result)
         result
     }
+
+  private def logResponse(response: BulkResponse): Unit = {
+    val count          = response.items.size
+    val keys           = response.items.map(_.id).mkString("[", ", ", "]")
+    val durationMillis = response.took
+    scribe.debug(
+      s"Saved $count consumer records with keys $keys to Elasticsearch in $durationMillis ms"
+    )
+  }
 }

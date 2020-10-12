@@ -8,6 +8,7 @@ import akka.stream.scaladsl.{Flow, Source}
 import links.kafka.Topic
 import org.apache.kafka.clients.consumer.ConsumerRecord
 
+// TODO: Add tests
 case class SaveLinkFlow(
     consumerSource: String => Source[
       (ConsumerRecord[String, String], CommittableOffset),
