@@ -2,6 +2,7 @@ package link.store.elasticsearch
 
 import akka.NotUsed
 import akka.actor.ActorSystem
+import akka.http.scaladsl.model.StatusCodes
 import akka.kafka.ConsumerMessage.CommittableOffset
 import akka.stream.scaladsl.{Flow, FlowWithContext}
 import com.sksamuel.elastic4s.ElasticDsl._
@@ -35,9 +36,8 @@ case class ElasticConnector(config: ElasticConfig)(implicit as: ActorSystem) {
   ) = recordsOffsets.unzip match {
     case (records, offsets) =>
       val documents = records.map(record => (record.key, record.value))
-      // TODO: Don't index already existing ids
       val indexRequests = documents.map { case (id, document) =>
-        indexInto(index).withId(id).doc(document)
+        indexInto(index).withId(id).createOnly(true).doc(document)
       }
       val lastOffset = offsets.last
       (indexRequests, lastOffset)
@@ -55,20 +55,31 @@ case class ElasticConnector(config: ElasticConfig)(implicit as: ActorSystem) {
   private def toBulkResponse(response: Response[BulkResponse]) =
     response.toEither match {
       case Left(error) =>
-        sys.error(s"Request failed: $error")
+        sys.error(
+          s"Request failed: $error"
+        ) // TODO: Add scribe-slf4j because stream failure is almost invisible in logs
       case Right(result) =>
-        if (result.hasFailures)
+        if (hasFailures(result))
           sys.error(s"Request result contained failures: ${result.failures}")
         logResponse(result)
         result
     }
 
+  private def hasFailures(result: BulkResponse): Boolean =
+    // Conflict means that a link already existed and was not updated
+    result.failures.exists(_.status != StatusCodes.Conflict.intValue)
+
   private def logResponse(response: BulkResponse): Unit = {
-    val count          = response.items.size
-    val keys           = response.items.map(_.id).mkString("[", ", ", "]")
+    val count          = response.successes.size
+    val keys           = response.successes.map(_.id).mkString("[", ", ", "]")
     val durationMillis = response.took
-    scribe.debug(
-      s"Saved $count consumer records with keys $keys to Elasticsearch in $durationMillis ms"
-    )
+    if (response.hasSuccesses)
+      scribe.info(
+        s"Saved $count consumer records with keys $keys to Elasticsearch in $durationMillis ms"
+      )
+    if (response.hasFailures) {
+      val skippedCount = response.failures.size
+      scribe.debug(s"$skippedCount duplicate consumer records skipped")
+    }
   }
 }
