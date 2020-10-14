@@ -9,7 +9,6 @@ import links.elasticsearch.Index
 import links.kafka.{KafkaConnector, Topic}
 import logging.Logging
 import pureconfig.generic.auto._
-import scribe.Level.Trace
 
 import scala.concurrent.ExecutionContextExecutor
 
@@ -22,8 +21,4 @@ object LinkStoreApp extends App with Config[LinkStoreConfig] with Logging {
   val indexFlow =
     elasticConnector.bulkIndexConsumerRecordFlow(Index.linkStoreIndex)
   val saveLinkFlow = SaveLinkFlow(kafkaConsumer, indexFlow)
-
-  override def defaultMinimumLoggingLevel = Trace // TODO: Remove, debug only
-
-  override def enableLoggingServer = false // TODO: Remove, debug only
 }

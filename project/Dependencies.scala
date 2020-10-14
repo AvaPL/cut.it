@@ -20,7 +20,7 @@ object Dependencies {
     "com.typesafe.akka" %% "akka-stream-testkit" % Version.akkaStreamTestkit % Test
   lazy val akkaHttpTestkit =
     "com.typesafe.akka" %% "akka-http-testkit" % Version.akkaHttpTestkit % Test
-  lazy val scribe = "com.outr" %% "scribe" % Version.scribe
+  lazy val scribeSlf4j = "com.outr" %% "scribe-slf4j" % Version.scribe
   lazy val pureconfig =
     "com.github.pureconfig" %% "pureconfig" % Version.pureconfig
   lazy val elastic4sCore =

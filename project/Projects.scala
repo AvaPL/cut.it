@@ -17,7 +17,7 @@ object Projects {
       libraryDependencies ++= Kit.scalatest,
       libraryDependencies ++= Kit.sangria,
       libraryDependencies ++= Kit.akkaHttp,
-      libraryDependencies += scribe % Provided
+      libraryDependencies += scribeSlf4j % Provided
     )
     .dependsOn(Common.config)
     .dependsOn(Common.logging)
@@ -28,7 +28,7 @@ object Projects {
       libraryDependencies ++= Kit.scalatest,
       libraryDependencies ++= Kit.sangria,
       libraryDependencies ++= Kit.akkaHttp,
-      libraryDependencies += scribe % Provided,
+      libraryDependencies += scribeSlf4j % Provided,
       libraryDependencies ++= Kit.alpakkaKafka
     )
     .dependsOn(Common.links)
@@ -41,7 +41,7 @@ object Projects {
       libraryDependencies ++= Kit.scalatest,
       libraryDependencies ++= Kit.sangria,
       libraryDependencies ++= Kit.akkaHttp,
-      libraryDependencies += scribe % Provided,
+      libraryDependencies += scribeSlf4j % Provided,
       libraryDependencies ++= Kit.alpakkaKafka,
       libraryDependencies ++= Kit.elastic4s
     )
@@ -54,14 +54,14 @@ object Projects {
       .settings(
         name := "config",
         libraryDependencies += pureconfig,
-        libraryDependencies += scribe % Provided,
+        libraryDependencies += scribeSlf4j % Provided,
         libraryDependencies ++= Kit.scalatest
       )
 
     lazy val logging = project
       .settings(
         name := "logging",
-        libraryDependencies += scribe,
+        libraryDependencies += scribeSlf4j,
         libraryDependencies ++= Kit.akkaHttp,
         libraryDependencies ++= Kit.scalatest
       )
