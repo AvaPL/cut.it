@@ -12,7 +12,7 @@ class LinkServiceTest extends AnyWordSpec with Matchers {
   "LinkService" when {
     "cutLink is called with uri" should {
       val uri         = "http://test.com"
-      val ignoreFlow  = LinkMessageFlow(Sink.ignore)
+      val ignoreFlow  = LinkMessageFlow("testTopic", Sink.ignore)
       val linkService = LinkService(ignoreFlow)
 
       "return cut link" in {

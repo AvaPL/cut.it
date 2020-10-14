@@ -1,4 +1,5 @@
 import Dependencies._
+import Dependencies.Kit._
 import com.typesafe.sbt.packager.Keys.dockerBaseImage
 import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
 import sbt.Keys.{libraryDependencies, name}
@@ -67,11 +68,12 @@ object Projects {
 
     lazy val links = project
       .settings(
-        name := "links"
+        name := "links",
+        libraryDependencies ++= Kit.alpakkaKafka % Provided
       )
   }
 
-  implicit class ProjectExtensions(val project: Project) extends AnyVal {
+  implicit class ProjectOps(val project: Project) extends AnyVal {
     def dockerize: Project = project
       .enablePlugins(JavaAppPackaging)
       .settings(

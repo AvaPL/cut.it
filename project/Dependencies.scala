@@ -91,5 +91,9 @@ object Dependencies {
         circeGeneric,
         circeParser
       )
+
+    implicit class KitOps(val kit: Seq[ModuleID]) extends AnyVal {
+      def %(scope: Configuration): Seq[ModuleID] = kit.map(_ % scope)
+    }
   }
 }

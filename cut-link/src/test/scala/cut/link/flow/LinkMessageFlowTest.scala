@@ -27,7 +27,7 @@ class LinkMessageFlowTest extends AnyWordSpec with Matchers {
         )
         val testProbe       = TestProbe()
         val testSink        = Sink.actorRef(testProbe.ref, "completed", _ => "failure")
-        val linkMessageFlow = LinkMessageFlow(testSink)
+        val linkMessageFlow = LinkMessageFlow("testTopic", testSink)
 
         linkMessageFlow.sendLinkMessage(link)
         val message = testProbe.receiveOne(1.second)

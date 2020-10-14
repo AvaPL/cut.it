@@ -1,6 +1,7 @@
 import sbt._
 
 object DebugDependencies {
+  // TODO: Probably this object can be removed after using scribe-slf4j
   lazy val akkaSlf4j = "com.typesafe.akka" %% "akka-slf4j"      % Version.akkaSlf4j
   lazy val logback   = "ch.qos.logback"     % "logback-classic" % Version.logback
 

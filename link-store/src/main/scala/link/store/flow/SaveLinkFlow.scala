@@ -5,12 +5,11 @@ import akka.kafka.CommitterSettings
 import akka.kafka.ConsumerMessage.CommittableOffset
 import akka.kafka.scaladsl.Committer
 import akka.stream.scaladsl.{Flow, Source}
-import links.kafka.Topic
 import org.apache.kafka.clients.consumer.ConsumerRecord
 
 // TODO: Add tests
 case class SaveLinkFlow(
-    consumerSource: String => Source[
+    consumerSource: Source[
       (ConsumerRecord[String, String], CommittableOffset),
       _
     ],
@@ -20,7 +19,7 @@ case class SaveLinkFlow(
       _
     ]
 )(implicit as: ActorSystem) {
-  consumerSource(Topic.cutLinkTopic)
+  consumerSource
     .via(logRecord)
     .via(indexFlow)
     .runWith(committerSink)

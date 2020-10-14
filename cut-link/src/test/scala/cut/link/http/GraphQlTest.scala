@@ -12,7 +12,7 @@ class GraphQlTest extends AnyWordSpec with Matchers with ScalatestRouteTest {
   "GraphQl" when {
     "sending POST to /graphql" should {
       "respond with 200 OK and return entity" in {
-        val ignoreFlow  = LinkMessageFlow(Sink.ignore)
+        val ignoreFlow  = LinkMessageFlow("testTopic", Sink.ignore)
         val linkService = LinkService(ignoreFlow)
         val graphql     = GraphQl(linkService)
         val uri         = "http://test.com"

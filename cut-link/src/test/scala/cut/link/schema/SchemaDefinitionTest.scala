@@ -24,7 +24,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
   implicit val system: ActorSystem = ActorSystem("test")
 
   val schema: Schema[LinkService, Unit] = SchemaDefinition.schema
-  val ignoreFlow: LinkMessageFlow       = LinkMessageFlow(Sink.ignore)
+  val ignoreFlow: LinkMessageFlow       = LinkMessageFlow("testTopic", Sink.ignore)
   val linkService: LinkService          = LinkService(ignoreFlow)
 
   "SchemaDefinition" when {
