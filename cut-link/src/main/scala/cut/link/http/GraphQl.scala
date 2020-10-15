@@ -15,10 +15,8 @@ import sangria.validation.{QueryValidator, Violation}
 
 import scala.concurrent.ExecutionContext
 
-case class GraphQl(linkService: LinkService)(implicit
-    ec: ExecutionContext
-) extends RouteDefinition {
-  override val route: Route = path("graphql") {
+case class GraphQl(linkService: LinkService)(implicit ec: ExecutionContext) {
+  val route: Route = path("graphql") {
     post {
       entity(as[Json]) { request =>
         graphqlEndpoint(request)

@@ -55,9 +55,7 @@ case class ElasticConnector(config: ElasticConfig)(implicit as: ActorSystem) {
   private def toBulkResponse(response: Response[BulkResponse]) =
     response.toEither match {
       case Left(error) =>
-        sys.error(
-          s"Request failed: $error"
-        ) // TODO: Add scribe-slf4j because stream failure is almost invisible in logs
+        sys.error(s"Request failed: $error")
       case Right(result) =>
         if (hasFailures(result))
           sys.error(s"Request result contained failures: ${result.failures}")

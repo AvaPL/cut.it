@@ -1,10 +1,12 @@
 package link.store.app
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
 import config.Config
 import link.store.config.LinkStoreConfig
 import link.store.elasticsearch.ElasticConnector
 import link.store.flow.SaveLinkFlow
+import link.store.http.LinkRetrievalService
 import links.elasticsearch.Index
 import links.kafka.{KafkaConnector, Topic}
 import logging.Logging
@@ -21,4 +23,8 @@ object LinkStoreApp extends App with Config[LinkStoreConfig] with Logging {
   val indexFlow =
     elasticConnector.bulkIndexConsumerRecordFlow(Index.linkStoreIndex)
   val saveLinkFlow = SaveLinkFlow(kafkaConsumer, indexFlow)
+  val route        = LinkRetrievalService().route
+
+  Http().newServerAt("0.0.0.0", config.port).bind(route)
+  scribe.info(s"link-store server started at port ${config.port}")
 }
