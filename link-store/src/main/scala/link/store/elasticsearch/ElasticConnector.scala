@@ -8,10 +8,13 @@ import akka.stream.scaladsl.{Flow, FlowWithContext}
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.akka.{AkkaHttpClient, AkkaHttpClientSettings}
 import com.sksamuel.elastic4s.requests.bulk.BulkResponse
+import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.indexes.IndexRequest
-import com.sksamuel.elastic4s.{ElasticClient, Response}
+import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Response}
 import link.store.config.ElasticConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
+
+import scala.concurrent.{ExecutionContext, Future}
 
 case class ElasticConnector(config: ElasticConfig)(implicit as: ActorSystem) {
   val client: ElasticClient = {
@@ -80,4 +83,24 @@ case class ElasticConnector(config: ElasticConfig)(implicit as: ActorSystem) {
       scribe.debug(s"$skippedCount duplicate consumer records skipped")
     }
   }
+
+  def getDocument(index: String, id: String): Future[String] = {
+    implicit val ec: ExecutionContext = as.dispatcher
+    client
+      .execute {
+        get(index, id)
+      }
+      .map(_.toEither)
+      .map(extractDocument)
+  }
+
+  private def extractDocument(response: Either[ElasticError, GetResponse]) =
+    response match {
+      case Right(response) if response.found => response.sourceAsString
+      case Right(response) =>
+        throw new NoSuchElementException(
+          s"Element with id ${response.id} not found in index ${response.index}"
+        )
+      case Left(error) => throw error.asException
+    }
 }

@@ -11,6 +11,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 
 import scala.util.{Failure, Success, Try}
 
+// TODO: Inject KafkaConnector instead of linkSink
 case class LinkMessageFlow(
     linkTopic: String,
     linkSink: Sink[ProducerRecord[String, String], _]

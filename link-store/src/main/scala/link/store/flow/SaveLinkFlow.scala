@@ -7,6 +7,7 @@ import akka.kafka.scaladsl.Committer
 import akka.stream.scaladsl.{Flow, Source}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 
+// TODO: Inject KafkaConnector and ElasticConnector instead of consumerSource and indexFlow
 case class SaveLinkFlow(
     consumerSource: Source[
       (ConsumerRecord[String, String], CommittableOffset),

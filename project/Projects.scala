@@ -69,7 +69,8 @@ object Projects {
     lazy val links = project
       .settings(
         name := "links",
-        libraryDependencies ++= Kit.alpakkaKafka % Provided
+        libraryDependencies ++= Kit.alpakkaKafka % Provided,
+        libraryDependencies += sangriaGraphql    % Provided
       )
   }
 

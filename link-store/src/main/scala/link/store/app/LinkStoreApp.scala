@@ -23,7 +23,9 @@ object LinkStoreApp extends App with Config[LinkStoreConfig] with Logging {
   val indexFlow =
     elasticConnector.bulkIndexConsumerRecordFlow(Index.linkStoreIndex)
   val saveLinkFlow = SaveLinkFlow(kafkaConsumer, indexFlow)
-  val route        = LinkRetrievalService().route
+  val route = LinkRetrievalService(
+    elasticConnector.getDocument(Index.linkStoreIndex, _)
+  ).route
 
   Http().newServerAt("0.0.0.0", config.port).bind(route)
   scribe.info(s"link-store server started at port ${config.port}")

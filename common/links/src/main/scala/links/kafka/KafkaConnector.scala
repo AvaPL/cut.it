@@ -18,13 +18,13 @@ import scala.concurrent.Future
 
 case class KafkaConnector(config: KafkaConfig) {
   def producer(implicit
-      system: ActorSystem
+      as: ActorSystem
   ): Sink[ProducerRecord[String, String], Future[Done]] =
     Producer.plainSink(producerSettings)
 
-  private def producerSettings(implicit system: ActorSystem) =
+  private def producerSettings(implicit as: ActorSystem) =
     ProducerSettings(
-      system,
+      as,
       new StringSerializer,
       new StringSerializer
     ).withBootstrapServers(
@@ -32,15 +32,15 @@ case class KafkaConnector(config: KafkaConfig) {
     ) // TODO: Replace with discovery in the future
 
   def consumer(topic: String)(implicit
-      system: ActorSystem
+      as: ActorSystem
   ): Source[(ConsumerRecord[String, String], CommittableOffset), Control] =
     Consumer
       .sourceWithOffsetContext(consumerSettings, Subscriptions.topics(topic))
       .asSource
 
-  private def consumerSettings(implicit system: ActorSystem) =
+  private def consumerSettings(implicit as: ActorSystem) =
     ConsumerSettings(
-      system,
+      as,
       new StringDeserializer,
       new StringDeserializer
     ).withGroupId("link_store")
