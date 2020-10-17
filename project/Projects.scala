@@ -43,7 +43,8 @@ object Projects {
       libraryDependencies ++= Kit.akkaHttp,
       libraryDependencies += scribeSlf4j % Provided,
       libraryDependencies ++= Kit.alpakkaKafka,
-      libraryDependencies ++= Kit.elastic4s
+      libraryDependencies ++= Kit.elastic4s,
+      libraryDependencies += catsCore
     )
     .dependsOn(Common.links)
     .dependsOn(Common.config)

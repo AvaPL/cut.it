@@ -29,6 +29,7 @@ object Dependencies {
     "com.sksamuel.elastic4s" %% "elastic4s-json-circe" % Version.elastic4sJsonCirce
   lazy val elastic4sClientAkka =
     "com.sksamuel.elastic4s" %% "elastic4s-client-akka" % Version.elastic4sClientAkka
+  lazy val catsCore = "org.typelevel" %% "cats-core" % Version.catsCore
 
   object Version {
     object Common {
@@ -55,6 +56,7 @@ object Dependencies {
     val elastic4sCore       = Common.elastic4s
     val elastic4sJsonCirce  = Common.elastic4s
     val elastic4sClientAkka = Common.elastic4s
+    val catsCore            = "2.0.0"
   }
 
   object Kit {

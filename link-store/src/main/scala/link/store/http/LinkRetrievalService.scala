@@ -5,12 +5,14 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.headers.Location
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import cats.data.EitherT
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import links.model.Link
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
+import cats.implicits._
 
 // TODO: Inject ElasticConnector instead of getDocument
 case class LinkRetrievalService(getDocument: String => Future[String])(implicit
@@ -32,10 +34,7 @@ case class LinkRetrievalService(getDocument: String => Future[String])(implicit
 
   private def retrieveLinkUri(id: String)(implicit as: ActorSystem) = {
     implicit val ec: ExecutionContext = as.dispatcher
-    // TODO: Use Cats for handling Future[Either]
-    getDocument(id).map(decode[Link]).map {
-      case Right(link)     => link.uri
-      case Left(exception) => throw exception
-    }
+    val link                          = getDocument(id).map(decode[Link])
+    EitherT(link).rethrowT.map(_.uri)
   }
 }
