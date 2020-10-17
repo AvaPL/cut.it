@@ -6,16 +6,17 @@ import akka.http.scaladsl.model.headers.Location
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import cats.data.EitherT
+import cats.implicits._
 import io.circe.generic.auto._
 import io.circe.parser.decode
+import link.store.elasticsearch.ElasticConnector
+import links.elasticsearch.Index
 import links.model.Link
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
-import cats.implicits._
 
-// TODO: Inject ElasticConnector instead of getDocument
-case class LinkRetrievalService(getDocument: String => Future[String])(implicit
+case class LinkRetrievalService(elasticConnector: ElasticConnector)(implicit
     as: ActorSystem
 ) {
   val route: Route = path(Segment) { id =>
@@ -34,7 +35,8 @@ case class LinkRetrievalService(getDocument: String => Future[String])(implicit
 
   private def retrieveLinkUri(id: String)(implicit as: ActorSystem) = {
     implicit val ec: ExecutionContext = as.dispatcher
-    val link                          = getDocument(id).map(decode[Link])
+    val document                      = elasticConnector.getDocument(Index.linkStoreIndex, id)
+    val link                          = document.map(decode[Link])
     EitherT(link).rethrowT.map(_.uri)
   }
 }

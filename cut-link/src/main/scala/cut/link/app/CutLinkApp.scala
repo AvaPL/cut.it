@@ -8,7 +8,7 @@ import cut.link.config.CutLinkConfig
 import cut.link.flow.LinkMessageFlow
 import cut.link.http.{GraphQl, GraphiQl}
 import cut.link.service.LinkService
-import links.kafka.{KafkaConnector, Topic}
+import links.kafka.KafkaConnector
 import logging.Logging
 import pureconfig.generic.auto._
 
@@ -18,8 +18,8 @@ object CutLinkApp extends App with Config[CutLinkConfig] with Logging {
   implicit val system: ActorSystem                        = ActorSystem("cut-link")
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-  val kafkaProducer   = KafkaConnector(config.kafka).producer
-  val linkMessageFlow = LinkMessageFlow(Topic.cutLinkTopic, kafkaProducer)
+  val kafkaConnector  = KafkaConnector(config.kafka)
+  val linkMessageFlow = LinkMessageFlow(kafkaConnector)
   val linkService     = LinkService(linkMessageFlow)
   val route           = GraphQl(linkService).route ~ GraphiQl.route
 

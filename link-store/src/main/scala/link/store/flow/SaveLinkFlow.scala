@@ -4,21 +4,20 @@ import akka.actor.ActorSystem
 import akka.kafka.CommitterSettings
 import akka.kafka.ConsumerMessage.CommittableOffset
 import akka.kafka.scaladsl.Committer
-import akka.stream.scaladsl.{Flow, Source}
+import akka.stream.scaladsl.Flow
+import link.store.elasticsearch.ElasticConnector
+import links.elasticsearch.Index
+import links.kafka.{KafkaConnector, Topic}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 
-// TODO: Inject KafkaConnector and ElasticConnector instead of consumerSource and indexFlow
 case class SaveLinkFlow(
-    consumerSource: Source[
-      (ConsumerRecord[String, String], CommittableOffset),
-      _
-    ],
-    indexFlow: Flow[
-      (ConsumerRecord[String, String], CommittableOffset),
-      (_, CommittableOffset),
-      _
-    ]
+    kafkaConnector: KafkaConnector,
+    elasticConnector: ElasticConnector
 )(implicit as: ActorSystem) {
+  private val consumerSource = kafkaConnector.consumer(Topic.cutLinkTopic)
+  private val indexFlow =
+    elasticConnector.bulkIndexConsumerRecordFlow(Index.linkStoreIndex)
+
   consumerSource
     .via(logRecord)
     .via(indexFlow)

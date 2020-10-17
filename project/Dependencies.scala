@@ -29,7 +29,8 @@ object Dependencies {
     "com.sksamuel.elastic4s" %% "elastic4s-json-circe" % Version.elastic4sJsonCirce
   lazy val elastic4sClientAkka =
     "com.sksamuel.elastic4s" %% "elastic4s-client-akka" % Version.elastic4sClientAkka
-  lazy val catsCore = "org.typelevel" %% "cats-core" % Version.catsCore
+  lazy val catsCore  = "org.typelevel" %% "cats-core" % Version.catsCore
+  lazy val scalamock = "org.scalamock" %% "scalamock" % Version.scalamock % Test
 
   object Version {
     object Common {
@@ -57,10 +58,11 @@ object Dependencies {
     val elastic4sJsonCirce  = Common.elastic4s
     val elastic4sClientAkka = Common.elastic4s
     val catsCore            = "2.0.0"
+    val scalamock           = "4.4.0"
   }
 
   object Kit {
-    lazy val scalatest = Seq(scalactic, Dependencies.scalatest)
+    lazy val scalatest = Seq(scalactic, Dependencies.scalatest, scalamock)
     lazy val sangria =
       Seq(
         Dependencies.sangriaGraphql,

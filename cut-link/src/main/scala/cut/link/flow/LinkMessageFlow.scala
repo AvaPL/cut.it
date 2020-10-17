@@ -2,20 +2,20 @@ package cut.link.flow
 
 import akka.actor.ActorSystem
 import akka.stream.QueueOfferResult.Enqueued
-import akka.stream.scaladsl.{Flow, Sink, Source, SourceQueueWithComplete}
+import akka.stream.scaladsl.{Flow, Source, SourceQueueWithComplete}
 import akka.stream.{OverflowStrategy, QueueOfferResult}
 import cut.link.model.Link
 import io.circe.generic.auto._
 import io.circe.syntax._
+import links.kafka.{KafkaConnector, Topic}
 import org.apache.kafka.clients.producer.ProducerRecord
 
 import scala.util.{Failure, Success, Try}
 
-// TODO: Inject KafkaConnector instead of linkSink
-case class LinkMessageFlow(
-    linkTopic: String,
-    linkSink: Sink[ProducerRecord[String, String], _]
-)(implicit as: ActorSystem) {
+case class LinkMessageFlow(kafkaConnector: KafkaConnector)(implicit
+    as: ActorSystem
+) {
+  private val linkSink = kafkaConnector.producer
   private val linkQueue: SourceQueueWithComplete[Link] = Source
     .queue[Link](1000, OverflowStrategy.dropNew)
     .map(linkProducerRecord)
@@ -39,7 +39,7 @@ case class LinkMessageFlow(
     }
 
   private def linkProducerRecord(link: Link) =
-    new ProducerRecord(linkTopic, link.id, link.asJson.noSpaces)
+    new ProducerRecord(Topic.cutLinkTopic, link.id, link.asJson.noSpaces)
 
   private def logRecord = Flow[ProducerRecord[String, String]].map { record =>
     scribe.debug(s"Sending link to Kafka: ${record.value}")

@@ -8,6 +8,8 @@ import cut.link.service.LinkService
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.{Decoder, Json}
+import links.kafka.KafkaConnector
+import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import sangria.ast.Document
@@ -20,12 +22,17 @@ import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-class SchemaDefinitionTest extends AnyWordSpec with Matchers {
+class SchemaDefinitionTest extends AnyWordSpec with Matchers with MockFactory {
   implicit val system: ActorSystem = ActorSystem("test")
 
-  val schema: Schema[LinkService, Unit] = SchemaDefinition.schema
-  val ignoreFlow: LinkMessageFlow       = LinkMessageFlow("testTopic", Sink.ignore)
-  val linkService: LinkService          = LinkService(ignoreFlow)
+  val schema: Schema[LinkService, Unit]  = SchemaDefinition.schema
+  val mockKafkaConnector: KafkaConnector = mock[KafkaConnector]
+  (mockKafkaConnector
+    .producer(_: ActorSystem))
+    .expects(*)
+    .returning(Sink.ignore)
+  val ignoreFlow: LinkMessageFlow = LinkMessageFlow(mockKafkaConnector)
+  val linkService: LinkService    = LinkService(ignoreFlow)
 
   "SchemaDefinition" when {
     "received cut link mutation" should {
