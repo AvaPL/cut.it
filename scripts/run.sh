@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source common.sh
-projects=("cut-link")
+projects=("cut-link" "link-store")
 
 function build_images() {
   echo "[info] Building Docker images ..."

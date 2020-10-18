@@ -7,6 +7,13 @@ services:
     ports:
       - "${CUT_LINK_PORT}:${CUT_LINK_PORT}"
       - "1065:1065"
+  link-store:
+    image: "link-store:0.1"
+    environment:
+      LINK_STORE_PORT: ${LINK_STORE_PORT}
+    ports:
+      - "${LINK_STORE_PORT}:${LINK_STORE_PORT}"
+      - "1066:1065"
   zookeeper:
     image: wurstmeister/zookeeper
     ports:
@@ -17,5 +24,10 @@ services:
       - "9092:9092"
     environment:
       # TODO: Add creating topics here (maybe also disable auto topic creation)
-      KAFKA_ADVERTISED_HOST_NAME: ${KAFKA_ADVERTISED_HOST_NAME}
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: ${KAFKA_ADVERTISED_LISTENERS}
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  elasticsearch:
+    image: bitnami/elasticsearch
+    ports:
+      - "9200:9200"

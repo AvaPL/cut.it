@@ -10,3 +10,5 @@ lazy val common = Projects.common
 lazy val `basic-graphql` = Projects.`basic-graphql`
 
 lazy val `cut-link` = Projects.`cut-link`
+
+lazy val `link-store` = Projects.`link-store`
