@@ -4,7 +4,6 @@ import java.time.OffsetDateTime
 
 import akka.Done
 import akka.actor.ActorSystem
-import akka.kafka.testkit.ProducerResultFactory
 import akka.stream.scaladsl.Sink
 import akka.testkit.TestProbe
 import cut.link.model.Link
