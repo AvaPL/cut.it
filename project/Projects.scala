@@ -1,5 +1,4 @@
 import Dependencies._
-import Dependencies.Kit._
 import com.typesafe.sbt.packager.Keys.dockerBaseImage
 import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
 import sbt.Keys.{libraryDependencies, name}
@@ -70,8 +69,8 @@ object Projects {
     lazy val links = project
       .settings(
         name := "links",
-        libraryDependencies ++= Kit.alpakkaKafka % Provided,
-        libraryDependencies += sangriaGraphql    % Provided
+        libraryDependencies += akkaStreamKafka % Provided,
+        libraryDependencies += sangriaGraphql  % Provided
       )
   }
 

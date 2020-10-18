@@ -11,26 +11,21 @@ import com.sksamuel.elastic4s.requests.bulk.BulkResponse
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.indexes.IndexRequest
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Response}
-import link.store.config.ElasticConfig
+import link.store.config.{BulkConfig, ElasticConfig}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case class ElasticConnector(config: ElasticConfig)(implicit as: ActorSystem) {
-  val client: ElasticClient = {
-    val hosts              = config.hosts.split(',').toSeq
-    val httpClientSettings = AkkaHttpClientSettings(hosts)
-    val httpClient         = AkkaHttpClient(httpClientSettings)
-    ElasticClient(httpClient)
-  }
-
+case class ElasticConnector(client: ElasticClient, bulkConfig: BulkConfig)(
+    implicit as: ActorSystem
+) {
   def bulkIndexConsumerRecordFlow(index: String): Flow[
     (ConsumerRecord[String, String], CommittableOffset),
     (BulkResponse, CommittableOffset),
     NotUsed
   ] =
     Flow[(ConsumerRecord[String, String], CommittableOffset)]
-      .groupedWithin(config.bulk.maxElements, config.bulk.timeWindow)
+      .groupedWithin(bulkConfig.maxElements, bulkConfig.timeWindow)
       .map(toIndexRequests(index))
       .via(bulkIndexFlow)
 
@@ -103,4 +98,16 @@ case class ElasticConnector(config: ElasticConfig)(implicit as: ActorSystem) {
         )
       case Left(error) => throw error.asException
     }
+}
+
+object ElasticConnector {
+  def apply(
+      config: ElasticConfig
+  )(implicit as: ActorSystem): ElasticConnector = {
+    val hosts              = config.hosts.split(',').toSeq
+    val httpClientSettings = AkkaHttpClientSettings(hosts)
+    val httpClient         = AkkaHttpClient(httpClientSettings)
+    val elasticClient      = ElasticClient(httpClient)
+    ElasticConnector(elasticClient, config.bulk)
+  }
 }

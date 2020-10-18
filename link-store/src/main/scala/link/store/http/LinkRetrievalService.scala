@@ -16,6 +16,7 @@ import links.model.Link
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
+// TODO: Add tests
 case class LinkRetrievalService(elasticConnector: ElasticConnector)(implicit
     as: ActorSystem
 ) {

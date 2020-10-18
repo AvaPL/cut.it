@@ -37,7 +37,7 @@ class LinkMessageFlowTest extends AnyWordSpec with Matchers with MockFactory {
         (mockKafkaConnector
           .producer(_: ActorSystem))
           .expects(*)
-          .returning(testSink)
+          .returning(testSink) // TODO: Use Alpakka testkit
         val linkMessageFlow = LinkMessageFlow(mockKafkaConnector)
 
         linkMessageFlow.sendLinkMessage(link)
