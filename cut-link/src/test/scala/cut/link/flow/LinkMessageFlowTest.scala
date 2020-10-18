@@ -4,6 +4,7 @@ import java.time.OffsetDateTime
 
 import akka.Done
 import akka.actor.ActorSystem
+import akka.kafka.testkit.ProducerResultFactory
 import akka.stream.scaladsl.Sink
 import akka.testkit.TestProbe
 import cut.link.model.Link
@@ -37,7 +38,7 @@ class LinkMessageFlowTest extends AnyWordSpec with Matchers with MockFactory {
         (mockKafkaConnector
           .producer(_: ActorSystem))
           .expects(*)
-          .returning(testSink) // TODO: Use Alpakka testkit
+          .returning(testSink)
         val linkMessageFlow = LinkMessageFlow(mockKafkaConnector)
 
         linkMessageFlow.sendLinkMessage(link)
