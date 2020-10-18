@@ -33,36 +33,46 @@ object Dependencies {
   lazy val scalamock = "org.scalamock" %% "scalamock" % Version.scalamock % Test
   lazy val akkaStreamKafkaTestkit =
     "com.typesafe.akka" %% "akka-stream-kafka-testkit" % Version.akkaStreamKafkaTestkit % Test
+  lazy val testcontainersScalaScalatest =
+    "com.dimafeng" %% "testcontainers-scala-scalatest" % Version.testcontainersScalaScalatest % Test
+  lazy val testcontainersScalaKafka =
+    "com.dimafeng" %% "testcontainers-scala-kafka" % Version.testcontainersScalaKafka % Test
+  lazy val testcontainersScalaElasticsearch =
+    "com.dimafeng" %% "testcontainers-scala-elasticsearch" % Version.testcontainersScalaElasticsearch % Test
 
   object Version {
     object Common {
-      val scalatest    = "3.2.0"
-      val circe        = "0.13.0"
-      val akka         = "2.6.9"
-      val elastic4s    = "7.9.1"
-      val alpakkaKafka = "2.0.5"
+      val scalatest      = "3.2.0"
+      val circe          = "0.13.0"
+      val akka           = "2.6.9"
+      val elastic4s      = "7.9.1"
+      val alpakkaKafka   = "2.0.5"
+      val testcontainers = "0.38.4"
     }
 
-    val scalactic              = Common.scalatest
-    val scalatest              = Common.scalatest
-    val sangriaGraphql         = "2.0.0"
-    val sangriaCirce           = "1.3.0"
-    val circeGeneric           = Common.circe
-    val circeParser            = Common.circe
-    val akkaStream             = Common.akka
-    val akkaHttp               = "10.2.0"
-    val akkaHttpCirce          = "1.34.0"
-    val akkaStreamTestkit      = Common.akka
-    val akkaStreamKafka        = Common.alpakkaKafka
-    val akkaHttpTestkit        = "10.2.0"
-    val scribe                 = "2.7.12"
-    val pureconfig             = "0.13.0"
-    val elastic4sCore          = Common.elastic4s
-    val elastic4sJsonCirce     = Common.elastic4s
-    val elastic4sClientAkka    = Common.elastic4s
-    val catsCore               = "2.0.0"
-    val scalamock              = "4.4.0"
-    val akkaStreamKafkaTestkit = Common.alpakkaKafka
+    val scalactic                        = Common.scalatest
+    val scalatest                        = Common.scalatest
+    val sangriaGraphql                   = "2.0.0"
+    val sangriaCirce                     = "1.3.0"
+    val circeGeneric                     = Common.circe
+    val circeParser                      = Common.circe
+    val akkaStream                       = Common.akka
+    val akkaHttp                         = "10.2.0"
+    val akkaHttpCirce                    = "1.34.0"
+    val akkaStreamTestkit                = Common.akka
+    val akkaStreamKafka                  = Common.alpakkaKafka
+    val akkaHttpTestkit                  = "10.2.0"
+    val scribe                           = "2.7.12"
+    val pureconfig                       = "0.13.0"
+    val elastic4sCore                    = Common.elastic4s
+    val elastic4sJsonCirce               = Common.elastic4s
+    val elastic4sClientAkka              = Common.elastic4s
+    val catsCore                         = "2.0.0"
+    val scalamock                        = "4.4.0"
+    val akkaStreamKafkaTestkit           = Common.alpakkaKafka
+    val testcontainersScalaScalatest     = Common.testcontainers
+    val testcontainersScalaKafka         = Common.testcontainers
+    val testcontainersScalaElasticsearch = Common.testcontainers
   }
 
   object Kit {
@@ -101,5 +111,10 @@ object Dependencies {
         circeGeneric,
         circeParser
       )
+    lazy val testcontainers = Seq(
+      testcontainersScalaScalatest,
+      testcontainersScalaKafka,
+      testcontainersScalaElasticsearch
+    )
   }
 }
