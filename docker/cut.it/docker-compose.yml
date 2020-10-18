@@ -9,7 +9,10 @@ services:
       - "1065:1065"
   link-store:
     image: "link-store:0.1"
+    environment:
+      LINK_STORE_PORT: ${LINK_STORE_PORT}
     ports:
+      - "${LINK_STORE_PORT}:${LINK_STORE_PORT}"
       - "1066:1065"
   zookeeper:
     image: wurstmeister/zookeeper

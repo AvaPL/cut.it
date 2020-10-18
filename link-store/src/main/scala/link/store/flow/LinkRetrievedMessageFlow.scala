@@ -1,30 +1,30 @@
-package cut.link.flow
+package link.store.flow
 
 import akka.actor.ActorSystem
 import akka.stream.QueueOfferResult.Enqueued
 import akka.stream.scaladsl.{Flow, Source, SourceQueueWithComplete}
 import akka.stream.{OverflowStrategy, QueueOfferResult}
-import cut.link.model.Link
 import io.circe.generic.auto._
 import io.circe.syntax._
 import links.kafka.{KafkaConnector, Topic}
+import links.model.Link
 import org.apache.kafka.clients.producer.ProducerRecord
 
 import scala.util.{Failure, Success, Try}
 
-case class LinkMessageFlow(kafkaConnector: KafkaConnector)(implicit
+case class LinkRetrievedMessageFlow(kafkaConnector: KafkaConnector)(implicit
     as: ActorSystem
 ) {
-  private val linkSink = kafkaConnector.producer
-  private val linkQueue: SourceQueueWithComplete[Link] = Source
+  private val retrievedLinkSink = kafkaConnector.producer
+  private val retrievedLinkQueue: SourceQueueWithComplete[Link] = Source
     .queue[Link](1000, OverflowStrategy.dropNew)
     .map(linkProducerRecord)
     .via(logRecord)
-    .to(linkSink)
+    .to(retrievedLinkSink)
     .run()
 
-  def sendLinkMessage(link: Link): Unit = {
-    val enqueueResult = linkQueue.offer(link)
+  def sendLinkRetrievedMessage(link: Link): Unit = {
+    val enqueueResult = retrievedLinkQueue.offer(link)
     enqueueResult.onComplete(logEnqueueResult)(as.dispatcher)
   }
 
@@ -39,10 +39,10 @@ case class LinkMessageFlow(kafkaConnector: KafkaConnector)(implicit
     }
 
   private def linkProducerRecord(link: Link) =
-    new ProducerRecord(Topic.cutLinkTopic, link.id, link.asJson.noSpaces)
+    new ProducerRecord(Topic.retrievedLinkTopic, link.id, link.asJson.noSpaces)
 
   private def logRecord = Flow[ProducerRecord[String, String]].map { record =>
-    scribe.debug(s"Sending link to Kafka: ${record.value}")
+    scribe.debug(s"Sending retrieved link to Kafka: ${record.value}")
     record
   }
 }
