@@ -1,8 +1,10 @@
 package link.store.elasticsearch
 
 import akka.actor.ActorSystem
+import akka.kafka.ConsumerMessage
 import akka.kafka.testkit.ConsumerResultFactory
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.OverflowStrategy
+import akka.stream.scaladsl.{Keep, Sink, Source}
 import com.dimafeng.testcontainers.ElasticsearchContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
 import com.sksamuel.elastic4s.ElasticDsl._
@@ -58,30 +60,15 @@ class ElasticConnectorTest
         elasticConnector =>
           val index     = randomAscii
           val indexFlow = elasticConnector.bulkIndexConsumerRecordFlow(index)
-          val recordsSource = Source.fromIterator(() =>
-            Iterator.continually(
-              (
-                new ConsumerRecord(
-                  "testTopic",
-                  0,
-                  0,
-                  randomAscii,
-                  """{"id":"AqeM6g","uri":"https://facebook.com","created":"2020-10-19T22:21:15.6987054+02:00"}"""
-                ),
-                ConsumerResultFactory.committableOffset(
-                  "groupId",
-                  "testTopic",
-                  0,
-                  0,
-                  ""
-                )
-              )
-            )
-          )
+          val recordsSource = Source.queue[
+            (ConsumerRecord[String, String], ConsumerMessage.CommittableOffset)
+          ](1000, OverflowStrategy.dropNew)
 
-          val firstBulkComplete =
-            recordsSource.take(15).via(indexFlow).runWith(Sink.head)
+          val (queue, firstBulkComplete) =
+            recordsSource.via(indexFlow).toMat(Sink.head)(Keep.both).run()
+          List.fill(15)(testRecord).foreach(queue.offer)
           Await.ready(firstBulkComplete, 10.seconds)
+          Thread.sleep(1000) // Additional second to index records
           val countFuture = elasticConnector.client.execute {
             count(index)
           }
@@ -91,7 +78,28 @@ class ElasticConnectorTest
           countValue should be(10)
       }(BulkConfig(10, 1.minute))
     }
+
+    // TODO: Add test with timeWindow
+    // TODO: Cleanup ALL tests (including new and old ones), simplify by extracting methods
   }
+
+  private def testRecord =
+    (
+      new ConsumerRecord(
+        "testTopic",
+        0,
+        0,
+        randomAscii,
+        """{"key":"value"}"""
+      ),
+      ConsumerResultFactory.committableOffset(
+        "groupId",
+        "testTopic",
+        0,
+        0,
+        ""
+      )
+    )
 
   private def withElasticConnector[T](
       runTest: ElasticConnector => T
