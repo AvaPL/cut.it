@@ -8,13 +8,12 @@ import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}
 import com.dimafeng.testcontainers.ElasticsearchContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.requests.bulk.BulkResponse
 import link.store.config.{BulkConfig, ElasticConfig}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.util.{Failure, Random}
 
