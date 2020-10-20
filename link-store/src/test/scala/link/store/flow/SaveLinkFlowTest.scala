@@ -18,6 +18,17 @@ import scala.concurrent.duration._
 class SaveLinkFlowTest extends AnyWordSpec with Matchers with MockFactory {
   implicit val system: ActorSystem = ActorSystem("test")
 
+  private val testMessage = (
+    new ConsumerRecord(Topic.cutLinkTopic, 0, 0, "key", "value"),
+    ConsumerResultFactory.committableOffset(
+      "testGroup",
+      "testTopic",
+      0,
+      0,
+      "testMeta"
+    )
+  )
+
   "SaveLinkFlow" when {
     "a message is sent" should {
       "pass the message unchanged to index flow" in {
@@ -42,17 +53,6 @@ class SaveLinkFlowTest extends AnyWordSpec with Matchers with MockFactory {
       .returning(testSource)
     mockKafkaConnector
   }
-
-  private def testMessage = (
-    new ConsumerRecord(Topic.cutLinkTopic, 0, 0, "key", "value"),
-    ConsumerResultFactory.committableOffset(
-      "testGroup",
-      "testTopic",
-      0,
-      0,
-      "testMeta"
-    )
-  )
 
   private def mockElasticConnector(testProbe: TestProbe) = {
     val mockElasticConnector = mock[ElasticConnector]

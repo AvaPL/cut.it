@@ -56,7 +56,7 @@ class LinkMessageFlowTest extends AnyWordSpec with Matchers with MockFactory {
   }
 
   private def receiveLink(testProbe: TestProbe) = {
-    val message = testProbe.receiveOne(2.seconds)
+    val message = testProbe.receiveOne(1.second)
     val record  = message.asInstanceOf[ProducerRecord[String, String]]
     decode[Link](record.value).getOrElse(throw new RuntimeException)
   }

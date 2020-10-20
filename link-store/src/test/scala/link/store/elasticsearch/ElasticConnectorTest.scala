@@ -8,6 +8,7 @@ import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}
 import com.dimafeng.testcontainers.ElasticsearchContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.requests.common.RefreshPolicy
 import link.store.config.{BulkConfig, ElasticConfig}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.scalatest.matchers.should.Matchers
@@ -148,7 +149,7 @@ class ElasticConnectorTest
 
   private def waitForRefresh(elasticConnector: ElasticConnector) = {
     val refreshFuture = elasticConnector.client.execute {
-      indexInto(randomAscii).refreshImmediately
+      indexInto(randomAscii).refresh(RefreshPolicy.WAIT_FOR)
     }
     Await.ready(refreshFuture, 10.seconds)
   }
