@@ -27,31 +27,44 @@ class LinkRetrievedMessageFlowTest
   "LinkRetrievedMessageFlow" when {
     "given a link to send" should {
       "send Kafka message" in {
-        val link = Link(
-          id = "id",
-          uri = "http://test.com",
-          created = OffsetDateTime.parse("2020-10-11T12:34:56Z")
-        )
-        val testProbe = TestProbe()
-        val testSink = Sink
-          .actorRef(testProbe.ref, "completed", _ => "failure")
-          .mapMaterializedValue(_ => Future.successful(Done))
-        val mockKafkaConnector = mock[KafkaConnector]
-        (mockKafkaConnector
-          .producer(_: ActorSystem))
-          .expects(*)
-          .returning(testSink)
-        val linkRetrievedMessageFlow =
-          LinkRetrievedMessageFlow(mockKafkaConnector)
+        val link                     = testLink
+        val testProbe                = TestProbe()
+        val linkRetrievedMessageFlow = mockedLinkRetrievedMessageFlow(testProbe)
 
         linkRetrievedMessageFlow.sendLinkRetrievedMessage(link)
-        val message = testProbe.receiveOne(1.second)
-        val record  = message.asInstanceOf[ProducerRecord[String, String]]
-        val messageLink =
-          decode[Link](record.value).getOrElse(throw new RuntimeException)
+        val messageLink: Link = receiveLink(testProbe)
 
         messageLink should be(link)
       }
     }
+  }
+
+  private def testLink =
+    Link(
+      id = "id",
+      uri = "http://test.com",
+      created = OffsetDateTime.parse("2020-10-11T12:34:56Z")
+    )
+
+  private def mockedLinkRetrievedMessageFlow(testProbe: TestProbe) = {
+    val testSink = Sink
+      .actorRef(testProbe.ref, "completed", _ => "failure")
+      .mapMaterializedValue(_ => Future.successful(Done))
+    val mockKafkaConnector = mock[KafkaConnector]
+    (mockKafkaConnector
+      .producer(_: ActorSystem))
+      .expects(*)
+      .returning(testSink)
+    val linkRetrievedMessageFlow =
+      LinkRetrievedMessageFlow(mockKafkaConnector)
+    linkRetrievedMessageFlow
+  }
+
+  private def receiveLink(testProbe: TestProbe) = {
+    val message = testProbe.receiveOne(1.second)
+    val record  = message.asInstanceOf[ProducerRecord[String, String]]
+    val messageLink =
+      decode[Link](record.value).getOrElse(throw new RuntimeException)
+    messageLink
   }
 }

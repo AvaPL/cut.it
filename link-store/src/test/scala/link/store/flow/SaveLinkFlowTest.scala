@@ -21,37 +21,46 @@ class SaveLinkFlowTest extends AnyWordSpec with Matchers with MockFactory {
   "SaveLinkFlow" when {
     "a message is sent" should {
       "pass the message unchanged to index flow" in {
-        val mockKafkaConnector = mock[KafkaConnector]
-        val testMessage = (
-          new ConsumerRecord(Topic.cutLinkTopic, 0, 0, "key", "value"),
-          ConsumerResultFactory.committableOffset(
-            "testGroup",
-            "testTopic",
-            0,
-            0,
-            "testMeta"
-          )
-        )
-        val testSource = Source
-          .single(testMessage)
-          .viaMat(ConsumerControlFactory.controlFlow())(Keep.right)
-        (mockKafkaConnector
-          .consumer(_: String)(_: ActorSystem))
-          .expects(Topic.cutLinkTopic, *)
-          .returning(testSource)
-        val mockElasticConnector = mock[ElasticConnector]
-        val testProbe            = TestProbe()
-        val testSink = Sink
-          .actorRef(testProbe.ref, "completed", _ => "failure")
-        (mockElasticConnector.bulkIndexConsumerRecordFlow _)
-          .expects(Index.linkStoreIndex)
-          .returning(Flow.fromSinkAndSource(testSink, Source.empty))
+        val testProbe = TestProbe()
 
-        SaveLinkFlow(mockKafkaConnector, mockElasticConnector)
+        SaveLinkFlow(mockKafkaConnector, mockElasticConnector(testProbe))
 
         val message = testProbe.receiveOne(1.second)
         message should be(testMessage)
       }
     }
+  }
+
+  private def mockKafkaConnector = {
+    val mockKafkaConnector = mock[KafkaConnector]
+    val testSource = Source
+      .single(testMessage)
+      .viaMat(ConsumerControlFactory.controlFlow())(Keep.right)
+    (mockKafkaConnector
+      .consumer(_: String)(_: ActorSystem))
+      .expects(Topic.cutLinkTopic, *)
+      .returning(testSource)
+    mockKafkaConnector
+  }
+
+  private def testMessage = (
+    new ConsumerRecord(Topic.cutLinkTopic, 0, 0, "key", "value"),
+    ConsumerResultFactory.committableOffset(
+      "testGroup",
+      "testTopic",
+      0,
+      0,
+      "testMeta"
+    )
+  )
+
+  private def mockElasticConnector(testProbe: TestProbe) = {
+    val mockElasticConnector = mock[ElasticConnector]
+    val testSink = Sink
+      .actorRef(testProbe.ref, "completed", _ => "failure")
+    (mockElasticConnector.bulkIndexConsumerRecordFlow _)
+      .expects(Index.linkStoreIndex)
+      .returning(Flow.fromSinkAndSource(testSink, Source.empty))
+    mockElasticConnector
   }
 }

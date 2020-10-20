@@ -22,23 +22,26 @@ class KafkaConnectorTest
   "KafkaConnector" when {
     "given message is sent to producer" should {
       "receive sent message in consumer" in withContainers { container =>
-        val kafkaConfig          = KafkaConfig(container.bootstrapServers)
-        val kafkaConnector       = KafkaConnector(kafkaConfig)
-        val topic                = "testTopic"
-        val producer             = kafkaConnector.producer
-        val consumer             = kafkaConnector.consumer(topic)
-        val producerConsumerFlow = Flow.fromSinkAndSource(producer, consumer)
-        val testMessage          = new ProducerRecord(topic, "key", "value")
+        val topic       = "testTopic"
+        val testMessage = new ProducerRecord(topic, "key", "value")
+        val messageFlow =
+          producerConsumerFlow(container.bootstrapServers, topic)
 
-        val messageFuture = Source
-          .single(testMessage)
-          .via(producerConsumerFlow)
-          .runWith(Sink.head)
+        val messageFuture =
+          Source.single(testMessage).via(messageFlow).runWith(Sink.head)
         val message = Await.result(messageFuture, 10.seconds)._1
 
         message.key should be(testMessage.key)
         message.value should be(testMessage.value)
       }
     }
+  }
+
+  private def producerConsumerFlow(bootstrapServers: String, topic: String) = {
+    val kafkaConfig    = KafkaConfig(bootstrapServers)
+    val kafkaConnector = KafkaConnector(kafkaConfig)
+    val producer       = kafkaConnector.producer
+    val consumer       = kafkaConnector.consumer(topic)
+    Flow.fromSinkAndSource(producer, consumer)
   }
 }

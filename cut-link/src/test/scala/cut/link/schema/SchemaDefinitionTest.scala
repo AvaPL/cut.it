@@ -37,26 +37,19 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers with MockFactory {
   "SchemaDefinition" when {
     "received cut link mutation" should {
       "cut link" in {
-        val cutLinkMutation =
-          graphql"""
-            mutation($$uri: String!) {
-              cutLink(uri: $$uri) {
-                id,
-                uri,
-                created
-              }
-            }
-          """
-        val uri       = "http://test.com"
-        val variables = uriVariables(uri)
+        val uri = "http://test.com"
 
-        val future = query(cutLinkMutation, variables)
-          .map(parseData[Link](_, "cutLink"))
-        val link = Await.result(future, 10.seconds)
+        val link = cutLink(uri)
 
         link.uri should be(uri)
       }
     }
+  }
+
+  private def cutLink(uri: String) = {
+    val queryFuture = query(cutLinkMutation, uriVariables(uri))
+      .map(parseData[Link](_, "cutLink"))
+    Await.result(queryFuture, 10.seconds)
   }
 
   private def query(userQuery: Document, variables: Json) =
@@ -68,13 +61,22 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers with MockFactory {
         userContext = linkService
       )
 
-  private def parseData[T](json: Json, field: String)(implicit
-      decoder: Decoder[T]
-  ) =
-    json.hcursor.downField("data").get[T](field) match {
-      case Right(value)  => value
-      case Left(failure) => throw new RuntimeException(failure.message)
-    }
+  private def cutLinkMutation =
+    graphql"""
+            mutation($$uri: String!) {
+              cutLink(uri: $$uri) {
+                id,
+                uri,
+                created
+              }
+            }
+          """
+
+  private def uriVariables(uri: String) =
+    json(s"""|{
+             |  "uri": "$uri"
+             |}
+             |""".stripMargin)
 
   private def json(string: String) =
     parse(string) match {
@@ -82,9 +84,11 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers with MockFactory {
       case Left(failure)    => throw failure
     }
 
-  private def uriVariables(uri: String) =
-    json(s"""|{
-             |  "uri": "$uri"
-             |}
-             |""".stripMargin)
+  private def parseData[T](json: Json, field: String)(implicit
+      decoder: Decoder[T]
+  ) =
+    json.hcursor.downField("data").get[T](field) match {
+      case Right(value)  => value
+      case Left(failure) => throw new RuntimeException(failure.message)
+    }
 }

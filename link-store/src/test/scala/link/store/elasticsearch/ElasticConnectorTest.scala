@@ -4,16 +4,17 @@ import akka.actor.ActorSystem
 import akka.kafka.ConsumerMessage
 import akka.kafka.testkit.ConsumerResultFactory
 import akka.stream.OverflowStrategy
-import akka.stream.scaladsl.{Keep, Sink, Source}
+import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}
 import com.dimafeng.testcontainers.ElasticsearchContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.requests.bulk.BulkResponse
 import link.store.config.{BulkConfig, ElasticConfig}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Random}
 
@@ -34,10 +35,7 @@ class ElasticConnectorTest
           val index        = randomAscii
           val id           = randomAscii
           val testDocument = """{"key":"value"}"""
-          val indexFuture = elasticConnector.client.execute {
-            indexInto(index).withId(id).doc(testDocument)
-          }
-          Await.ready(indexFuture, 10.seconds)
+          indexDocument(elasticConnector, index, id, testDocument)
 
           val documentFuture = elasticConnector.getDocument(index, id)
           val document       = Await.result(documentFuture, 10.seconds)
@@ -76,8 +74,6 @@ class ElasticConnectorTest
           count should be(1)
       }(BulkConfig(10, 2.seconds))
     }
-
-    // TODO: Cleanup ALL tests (including new and old ones), simplify by extracting methods
   }
 
   private def withElasticConnector[T](
@@ -91,21 +87,47 @@ class ElasticConnectorTest
 
   private def randomAscii = Random.alphanumeric.take(10).mkString.toLowerCase
 
+  private def indexDocument(
+      elasticConnector: ElasticConnector,
+      index: String,
+      id: String,
+      testDocument: String
+  ) = {
+    val indexFuture = elasticConnector.client.execute {
+      indexInto(index).withId(id).doc(testDocument)
+    }
+    Await.ready(indexFuture, 10.seconds)
+  }
+
   private def bulkIndexTestRecords(
       elasticConnector: ElasticConnector,
       index: String,
       count: Int
   ) = {
+    val (queue, firstBulkComplete) = runIndexFlow(elasticConnector, index)
+    sendTestRecords(queue, count)
+    Await.ready(firstBulkComplete, 10.seconds)
+    waitForRefresh(elasticConnector)
+  }
+
+  private def runIndexFlow(
+      elasticConnector: ElasticConnector,
+      index: String
+  ) = {
     val indexFlow = elasticConnector.bulkIndexConsumerRecordFlow(index)
     val recordsSource = Source.queue[
       (ConsumerRecord[String, String], ConsumerMessage.CommittableOffset)
     ](1000, OverflowStrategy.dropNew)
-    val (queue, firstBulkComplete) =
-      recordsSource.via(indexFlow).toMat(Sink.head)(Keep.both).run()
-    List.fill(count)(testRecord).foreach(queue.offer)
-    Await.ready(firstBulkComplete, 10.seconds)
-    waitForRefresh(elasticConnector)
+    recordsSource.via(indexFlow).toMat(Sink.head)(Keep.both).run()
   }
+
+  private def sendTestRecords(
+      queue: SourceQueueWithComplete[
+        (ConsumerRecord[String, String], ConsumerMessage.CommittableOffset)
+      ],
+      count: Int
+  ): Unit =
+    List.fill(count)(testRecord).foreach(queue.offer)
 
   private def testRecord =
     (

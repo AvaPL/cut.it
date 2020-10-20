@@ -13,14 +13,8 @@ class LinkServiceTest extends AnyWordSpec with Matchers with MockFactory {
 
   "LinkService" when {
     "cutLink is called with uri" should {
-      val uri                = "http://test.com"
-      val mockKafkaConnector = mock[KafkaConnector]
-      (mockKafkaConnector
-        .producer(_: ActorSystem))
-        .expects(*)
-        .returning(Sink.ignore)
-      val ignoreFlow  = LinkMessageFlow(mockKafkaConnector)
-      val linkService = LinkService(ignoreFlow)
+      val uri         = "http://test.com"
+      val linkService = mockedLinkService
 
       "return cut link" in {
         val link = linkService.cutLink(uri)
@@ -35,5 +29,15 @@ class LinkServiceTest extends AnyWordSpec with Matchers with MockFactory {
         link.id should not startWith "="
       }
     }
+  }
+
+  private def mockedLinkService = {
+    val mockKafkaConnector = mock[KafkaConnector]
+    (mockKafkaConnector
+      .producer(_: ActorSystem))
+      .expects(*)
+      .returning(Sink.ignore)
+    val ignoreFlow = LinkMessageFlow(mockKafkaConnector)
+    LinkService(ignoreFlow)
   }
 }
