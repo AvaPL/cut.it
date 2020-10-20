@@ -56,31 +56,55 @@ class ElasticConnectorTest
     }
 
     "indexing consumer records in bulk" should {
-      "send 10 elements for 10 elements bulk limit and 15 elements sent" in withElasticConnector {
+      "send 10 elements for 10 elements bulk limit, 1 minute time window and 15 elements sent" in withElasticConnector {
         elasticConnector =>
-          val index     = randomAscii
-          val indexFlow = elasticConnector.bulkIndexConsumerRecordFlow(index)
-          val recordsSource = Source.queue[
-            (ConsumerRecord[String, String], ConsumerMessage.CommittableOffset)
-          ](1000, OverflowStrategy.dropNew)
+          val index = randomAscii
 
-          val (queue, firstBulkComplete) =
-            recordsSource.via(indexFlow).toMat(Sink.head)(Keep.both).run()
-          List.fill(15)(testRecord).foreach(queue.offer)
-          Await.ready(firstBulkComplete, 10.seconds)
-          Thread.sleep(1000) // Additional second to index records
-          val countFuture = elasticConnector.client.execute {
-            count(index)
-          }
-          val countResponse = Await.result(countFuture, 10.seconds)
-          val countValue    = countResponse.map(_.count).result
+          bulkIndexTestRecords(elasticConnector, index, 15)
+          val count = countDocuments(elasticConnector, index)
 
-          countValue should be(10)
+          count should be(10)
       }(BulkConfig(10, 1.minute))
+
+      "send 1 element after 2 seconds for 10 elements bulk limit, 2 seconds time window and 1 element sent" in withElasticConnector {
+        elasticConnector =>
+          val index = randomAscii
+
+          bulkIndexTestRecords(elasticConnector, index, 1)
+          val count = countDocuments(elasticConnector, index)
+
+          count should be(1)
+      }(BulkConfig(10, 2.seconds))
     }
 
-    // TODO: Add test with timeWindow
     // TODO: Cleanup ALL tests (including new and old ones), simplify by extracting methods
+  }
+
+  private def withElasticConnector[T](
+      runTest: ElasticConnector => T
+  )(implicit bulkConfig: BulkConfig): T =
+    withContainers { container =>
+      val elasticConfig    = ElasticConfig(container.httpHostAddress, bulkConfig)
+      val elasticConnector = ElasticConnector(elasticConfig)
+      runTest(elasticConnector)
+    }
+
+  private def randomAscii = Random.alphanumeric.take(10).mkString.toLowerCase
+
+  private def bulkIndexTestRecords(
+      elasticConnector: ElasticConnector,
+      index: String,
+      count: Int
+  ) = {
+    val indexFlow = elasticConnector.bulkIndexConsumerRecordFlow(index)
+    val recordsSource = Source.queue[
+      (ConsumerRecord[String, String], ConsumerMessage.CommittableOffset)
+    ](1000, OverflowStrategy.dropNew)
+    val (queue, firstBulkComplete) =
+      recordsSource.via(indexFlow).toMat(Sink.head)(Keep.both).run()
+    List.fill(count)(testRecord).foreach(queue.offer)
+    Await.ready(firstBulkComplete, 10.seconds)
+    waitForRefresh(elasticConnector)
   }
 
   private def testRecord =
@@ -101,14 +125,21 @@ class ElasticConnectorTest
       )
     )
 
-  private def withElasticConnector[T](
-      runTest: ElasticConnector => T
-  )(implicit bulkConfig: BulkConfig): T =
-    withContainers { container =>
-      val elasticConfig    = ElasticConfig(container.httpHostAddress, bulkConfig)
-      val elasticConnector = ElasticConnector(elasticConfig)
-      runTest(elasticConnector)
+  private def waitForRefresh(elasticConnector: ElasticConnector) = {
+    val refreshFuture = elasticConnector.client.execute {
+      indexInto(randomAscii).refreshImmediately
     }
+    Await.ready(refreshFuture, 10.seconds)
+  }
 
-  private def randomAscii = Random.alphanumeric.take(10).mkString.toLowerCase
+  private def countDocuments(
+      elasticConnector: ElasticConnector,
+      index: String
+  ) = {
+    val countFuture = elasticConnector.client.execute {
+      count(index)
+    }
+    val countResponse = Await.result(countFuture, 10.seconds)
+    countResponse.map(_.count).result
+  }
 }
