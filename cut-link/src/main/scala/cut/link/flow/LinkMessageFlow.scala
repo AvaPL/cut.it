@@ -4,10 +4,10 @@ import akka.actor.ActorSystem
 import akka.stream.QueueOfferResult.Enqueued
 import akka.stream.scaladsl.{Flow, Source, SourceQueueWithComplete}
 import akka.stream.{OverflowStrategy, QueueOfferResult}
-import cut.link.model.Link
 import io.circe.generic.auto._
 import io.circe.syntax._
 import links.kafka.{KafkaConnector, Topic}
+import links.model.Link
 import org.apache.kafka.clients.producer.ProducerRecord
 
 import scala.util.{Failure, Success, Try}

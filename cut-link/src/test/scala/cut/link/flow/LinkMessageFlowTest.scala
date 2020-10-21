@@ -6,10 +6,10 @@ import akka.Done
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.Sink
 import akka.testkit.TestProbe
-import cut.link.model.Link
 import io.circe.generic.auto._
 import io.circe.parser._
 import links.kafka.KafkaConnector
+import links.model.Link
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers

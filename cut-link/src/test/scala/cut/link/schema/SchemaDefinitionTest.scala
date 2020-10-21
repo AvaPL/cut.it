@@ -3,12 +3,12 @@ package cut.link.schema
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.Sink
 import cut.link.flow.LinkMessageFlow
-import cut.link.model.Link
 import cut.link.service.LinkService
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.{Decoder, Json}
 import links.kafka.KafkaConnector
+import links.model.Link
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec

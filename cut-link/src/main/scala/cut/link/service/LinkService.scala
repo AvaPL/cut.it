@@ -3,7 +3,7 @@ package cut.link.service
 import java.util.Base64
 
 import cut.link.flow.LinkMessageFlow
-import cut.link.model.Link
+import links.model.Link
 
 case class LinkService(linkMessageFlow: LinkMessageFlow) {
   private val base64Encoder = Base64.getUrlEncoder

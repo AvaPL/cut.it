@@ -1,44 +1,29 @@
+package integration.tests
+
 import akka.actor.Scheduler
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
-import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.pattern.retry
 import cats.data.EitherT
 import cats.implicits._
 import com.dimafeng.testcontainers.lifecycle._
-import com.dimafeng.testcontainers.scalatest.TestContainersForAll
-import com.dimafeng.testcontainers.{ElasticsearchContainer, KafkaContainer}
 import cut.link.flow.LinkMessageFlow
 import cut.link.http.GraphQl
-import cut.link.model.Link
 import cut.link.service.LinkService
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import integration.tests.common.IntegrationTest
 import io.circe.Json
 import io.circe.generic.auto._
 import io.circe.parser.decode
-import link.store.config.{BulkConfig, ElasticConfig}
 import link.store.elasticsearch.ElasticConnector
 import link.store.flow.SaveLinkFlow
 import links.elasticsearch.Index
-import links.kafka.{KafkaConfig, KafkaConnector}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
+import links.kafka.KafkaConnector
+import links.model.Link
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class CutLinkSpec
-    extends AnyWordSpec
-    with Matchers
-    with TestContainersForAll
-    with ScalatestRouteTest {
-  override type Containers = KafkaContainer and ElasticsearchContainer
-
-  override def startContainers(): Containers = {
-    val kafka = KafkaContainer.Def().start()
-    val elasticsearch =
-      ElasticsearchContainer.Def("bitnami/elasticsearch").start()
-    kafka and elasticsearch
-  }
+class CutLinkSpec extends IntegrationTest {
 
   "Cut link flow" when {
     "a cut link request is sent" should {
@@ -57,17 +42,6 @@ class CutLinkSpec
           retrievedLink.uri should be(uri)
       }
     }
-  }
-
-  private def testKafkaConnector(kafka: KafkaContainer) = {
-    val kafkaConfig = KafkaConfig(kafka.bootstrapServers)
-    KafkaConnector(kafkaConfig)
-  }
-
-  private def testElasticConnector(elasticsearch: ElasticsearchContainer) = {
-    val bulkConfig    = BulkConfig(1000, 10.seconds)
-    val elasticConfig = ElasticConfig(elasticsearch.httpHostAddress, bulkConfig)
-    ElasticConnector(elasticConfig)
   }
 
   private def testGraphQl(kafkaConnector: KafkaConnector) = {
