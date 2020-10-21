@@ -54,7 +54,9 @@ object Projects {
     .settings(
       name := "integration-tests",
       libraryDependencies ++= Kit.scalatest,
-      libraryDependencies ++= Kit.testcontainers
+      libraryDependencies ++= Kit.testcontainers,
+      libraryDependencies += akkaStreamTestkit,
+      libraryDependencies += akkaHttpTestkit
     )
     .dependsOn(`cut-link`)
     .dependsOn(`link-store`)

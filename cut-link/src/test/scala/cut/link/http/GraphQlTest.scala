@@ -22,11 +22,11 @@ class GraphQlTest
   "GraphQl" when {
     "sending POST to /graphql" should {
       "respond with 200 OK and return entity" in {
-        val graphql                     = mockedGraphQl
+        val graphQl                     = mockedGraphQl
         val (request, expectedResponse) = testCutLinkMutation
         val requestEntity               = HttpEntity(ContentTypes.`application/json`, request)
 
-        Post("/graphql", requestEntity) ~> graphql.route ~> check {
+        Post("/graphql", requestEntity) ~> graphQl.route ~> check {
           status should be(StatusCodes.OK)
           responseAs[String] should be(expectedResponse)
         }
