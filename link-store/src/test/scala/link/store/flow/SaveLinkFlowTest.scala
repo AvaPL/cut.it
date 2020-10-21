@@ -19,7 +19,7 @@ class SaveLinkFlowTest extends AnyWordSpec with Matchers with MockFactory {
   implicit val system: ActorSystem = ActorSystem("test")
 
   private val testMessage = (
-    new ConsumerRecord(Topic.cutLinkTopic, 0, 0, "key", "value"),
+    new ConsumerRecord(Topic.linkCutTopic, 0, 0, "key", "value"),
     ConsumerResultFactory.committableOffset(
       "testGroup",
       "testTopic",
@@ -49,7 +49,7 @@ class SaveLinkFlowTest extends AnyWordSpec with Matchers with MockFactory {
       .viaMat(ConsumerControlFactory.controlFlow())(Keep.right)
     (mockKafkaConnector
       .consumer(_: String, _: String)(_: ActorSystem))
-      .expects(Topic.cutLinkTopic, ConsumerGroup.linkStoreGroup, *)
+      .expects(Topic.linkCutTopic, ConsumerGroup.linkStoreGroup, *)
       .returning(testSource)
     mockKafkaConnector
   }

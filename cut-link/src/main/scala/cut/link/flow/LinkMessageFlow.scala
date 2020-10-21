@@ -39,7 +39,7 @@ case class LinkMessageFlow(kafkaConnector: KafkaConnector)(implicit
     }
 
   private def linkProducerRecord(link: Link) =
-    new ProducerRecord(Topic.cutLinkTopic, link.id, link.asJson.noSpaces)
+    new ProducerRecord(Topic.linkCutTopic, link.id, link.asJson.noSpaces)
 
   private def logRecord = Flow[ProducerRecord[String, String]].map { record =>
     scribe.debug(s"Sending link to Kafka: ${record.value}")

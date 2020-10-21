@@ -15,7 +15,7 @@ case class SaveLinkFlow(
     elasticConnector: ElasticConnector
 )(implicit as: ActorSystem) {
   private val consumerSource =
-    kafkaConnector.consumer(Topic.cutLinkTopic, ConsumerGroup.linkStoreGroup)
+    kafkaConnector.consumer(Topic.linkCutTopic, ConsumerGroup.linkStoreGroup)
   private val indexFlow =
     elasticConnector.bulkIndexConsumerRecordFlow(Index.linkStoreIndex)
 

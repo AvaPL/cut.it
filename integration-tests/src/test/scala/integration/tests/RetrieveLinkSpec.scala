@@ -72,7 +72,7 @@ class RetrieveLinkSpec extends IntegrationTest {
 
   private def receiveLinkMessage(kafkaConnector: KafkaConnector) = {
     val linkRetrievedEventFuture = kafkaConnector
-      .consumer(Topic.retrievedLinkTopic, "test_group")
+      .consumer(Topic.linkRetrievedTopic, "test_group")
       .runWith(Sink.head)
     val linkEventMessage = Await.result(linkRetrievedEventFuture, 10.seconds)
     decode[Link](linkEventMessage._1.value).toOption.get
