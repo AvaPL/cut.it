@@ -41,7 +41,7 @@ class KafkaConnectorTest
     val kafkaConfig    = KafkaConfig(bootstrapServers)
     val kafkaConnector = KafkaConnector(kafkaConfig)
     val producer       = kafkaConnector.producer
-    val consumer       = kafkaConnector.consumer(topic)
+    val consumer       = kafkaConnector.consumer(topic, "test-group")
     Flow.fromSinkAndSource(producer, consumer)
   }
 }

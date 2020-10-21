@@ -12,3 +12,5 @@ lazy val `basic-graphql` = Projects.`basic-graphql`
 lazy val `cut-link` = Projects.`cut-link`
 
 lazy val `link-store` = Projects.`link-store`
+
+lazy val `integration-tests` = Projects.`integration-tests`

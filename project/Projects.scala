@@ -1,7 +1,7 @@
 import Dependencies._
 import com.typesafe.sbt.packager.Keys.dockerBaseImage
 import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
-import sbt.Keys._
+import sbt.Keys.{libraryDependencies, _}
 import sbt._
 
 object Projects {
@@ -49,6 +49,15 @@ object Projects {
     .dependsOn(Common.links)
     .dependsOn(Common.config)
     .dependsOn(Common.logging)
+
+  lazy val `integration-tests` = project
+    .settings(
+      name := "integration-tests",
+      libraryDependencies ++= Kit.scalatest,
+      libraryDependencies ++= Kit.testcontainers
+    )
+    .dependsOn(`cut-link`)
+    .dependsOn(`link-store`)
 
   object Common {
     lazy val config = project

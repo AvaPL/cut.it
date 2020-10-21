@@ -7,7 +7,7 @@ import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import akka.testkit.TestProbe
 import link.store.elasticsearch.ElasticConnector
 import links.elasticsearch.Index
-import links.kafka.{KafkaConnector, Topic}
+import links.kafka.{ConsumerGroup, KafkaConnector, Topic}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
@@ -48,8 +48,8 @@ class SaveLinkFlowTest extends AnyWordSpec with Matchers with MockFactory {
       .single(testMessage)
       .viaMat(ConsumerControlFactory.controlFlow())(Keep.right)
     (mockKafkaConnector
-      .consumer(_: String)(_: ActorSystem))
-      .expects(Topic.cutLinkTopic, *)
+      .consumer(_: String, _: String)(_: ActorSystem))
+      .expects(Topic.cutLinkTopic, ConsumerGroup.linkStoreGroup, *)
       .returning(testSource)
     mockKafkaConnector
   }
