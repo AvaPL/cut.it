@@ -16,13 +16,16 @@ class LoggingTest
 
   var logging: Logging = newLogging
 
+  override protected def afterEach(): Unit =
+    try super.afterEach()
+    finally logging = newLogging
+
   private def newLogging: App with Logging = new Object with App with Logging {
     override def enableLoggingServer: Boolean      = false
     override def defaultMinimumLoggingLevel: Level = Error
   }
 
   "Logging" when {
-
     "started" should {
       s"include ${logging.defaultMinimumLoggingLevel} logging level" in {
         scribeLevelShouldBe(logging.defaultMinimumLoggingLevel)
@@ -65,10 +68,6 @@ class LoggingTest
       }
     }
   }
-
-  override protected def afterEach(): Unit =
-    try super.afterEach()
-    finally logging = newLogging
 
   private def scribeLevelShouldBe(level: Level) = {
     scribe.Logger.root.includes(level) should be(true)

@@ -30,22 +30,17 @@ class LinkRetrievalServiceTest
     with ScalatestRouteTest
     with MockFactory {
 
-  "LinkRetrievalService" when {
-    val testProbe                = TestProbe()
-    val linkRetrievedMessageFlow = mockRetrievedMessageFlow(testProbe)
+  val testProbe: TestProbe = TestProbe()
+  val linkRetrievedMessageFlow: LinkRetrievedMessageFlow =
+    mockRetrievedMessageFlow(testProbe)
 
+  "LinkRetrievalService" when {
     "given a correct link id" should {
       "redirect user to link uri" in {
-        val link                 = Link("testId", "https://github.com/AvaPL")
-        val linkDocument         = link.asJson.noSpaces
-        val mockElasticConnector = mock[ElasticConnector]
-        (mockElasticConnector.getDocument _)
-          .expects(Index.linkStoreIndex, link.id)
-          .returning(Future.successful(linkDocument))
-        val linkRetrievalService = LinkRetrievalService(
-          mockElasticConnector,
-          linkRetrievedMessageFlow
-        )
+        val link         = Link("testId", "https://github.com/AvaPL")
+        val linkDocument = link.asJson.noSpaces
+        val linkRetrievalService =
+          serviceWithGetDocumentSuccess(link.id, linkDocument)
 
         Get(s"/${link.id}") ~> linkRetrievalService.route ~> check {
           status should be(StatusCodes.MovedPermanently)
@@ -55,16 +50,10 @@ class LinkRetrievalServiceTest
       }
 
       "respond with 404 Not Found for decoding failure" in {
-        val linkId               = "testId"
-        val malformedDocument    = "malformed JSON link"
-        val mockElasticConnector = mock[ElasticConnector]
-        (mockElasticConnector.getDocument _)
-          .expects(Index.linkStoreIndex, linkId)
-          .returning(Future.successful(malformedDocument))
-        val linkRetrievalService = LinkRetrievalService(
-          mockElasticConnector,
-          linkRetrievedMessageFlow
-        )
+        val linkId            = "testId"
+        val malformedDocument = "malformed JSON link"
+        val linkRetrievalService =
+          serviceWithGetDocumentSuccess(linkId, malformedDocument)
 
         Get(s"/$linkId") ~> linkRetrievalService.route ~> check {
           status should be(StatusCodes.NotFound)
@@ -77,16 +66,10 @@ class LinkRetrievalServiceTest
 
     "given invalid link id" should {
       "respond with 404 Not Found and exception message" in {
-        val linkId               = "invalidId"
-        val exception            = new RuntimeException("Exception message")
-        val mockElasticConnector = mock[ElasticConnector]
-        (mockElasticConnector.getDocument _)
-          .expects(Index.linkStoreIndex, linkId)
-          .returning(Future.failed(exception))
-        val linkRetrievalService = LinkRetrievalService(
-          mockElasticConnector,
-          linkRetrievedMessageFlow
-        )
+        val linkId    = "invalidId"
+        val exception = new RuntimeException("Exception message")
+        val linkRetrievalService: LinkRetrievalService =
+          serviceWithGetDocumentFailure(linkId, exception)
 
         Get(s"/$linkId") ~> linkRetrievalService.route ~> check {
           status should be(StatusCodes.NotFound)
@@ -98,9 +81,7 @@ class LinkRetrievalServiceTest
     }
 
     "called with invalid number of segments" should {
-      val mockElasticConnector = mock[ElasticConnector]
-      val linkRetrievalService =
-        LinkRetrievalService(mockElasticConnector, linkRetrievedMessageFlow)
+      val linkRetrievalService = mockLinkRetrievalService
 
       "reject request for more than 1 segment" in {
         Get("/more/segments") ~> linkRetrievalService.route ~> check {
@@ -117,11 +98,7 @@ class LinkRetrievalServiceTest
 
     "called with not allowed methods" should {
       "reject request" in {
-        val mockElasticConnector = mock[ElasticConnector]
-        val linkRetrievalService = LinkRetrievalService(
-          mockElasticConnector,
-          linkRetrievedMessageFlow
-        )
+        val linkRetrievalService = mockLinkRetrievalService
 
         Post("/id") ~> linkRetrievalService.route ~> check {
           rejection shouldBe a[MethodRejection]
@@ -153,11 +130,45 @@ class LinkRetrievalServiceTest
     linkRetrievedMessageFlow
   }
 
+  private def serviceWithGetDocumentSuccess(id: String, document: String) = {
+    val mockElasticConnector = mock[ElasticConnector]
+    (mockElasticConnector.getDocument _)
+      .expects(Index.linkStoreIndex, id)
+      .returning(Future.successful(document))
+    val linkRetrievalService = LinkRetrievalService(
+      mockElasticConnector,
+      linkRetrievedMessageFlow
+    )
+    linkRetrievalService
+  }
+
   private def checkLinkMessageSent(link: Link, testProbe: TestProbe) = {
     val message = testProbe.receiveOne(1.second)
     val record  = message.asInstanceOf[ProducerRecord[String, String]]
     val messageLink =
       decode[Link](record.value).getOrElse(throw new RuntimeException)
     messageLink should be(link)
+  }
+
+  private def serviceWithGetDocumentFailure(
+      linkId: String,
+      exception: RuntimeException
+  ) = {
+    val mockElasticConnector = mock[ElasticConnector]
+    (mockElasticConnector.getDocument _)
+      .expects(Index.linkStoreIndex, linkId)
+      .returning(Future.failed(exception))
+    val linkRetrievalService = LinkRetrievalService(
+      mockElasticConnector,
+      linkRetrievedMessageFlow
+    )
+    linkRetrievalService
+  }
+
+  private def mockLinkRetrievalService = {
+    val mockElasticConnector = mock[ElasticConnector]
+    val linkRetrievalService =
+      LinkRetrievalService(mockElasticConnector, linkRetrievedMessageFlow)
+    linkRetrievalService
   }
 }

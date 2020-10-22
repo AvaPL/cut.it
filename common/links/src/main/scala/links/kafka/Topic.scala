@@ -4,6 +4,6 @@ package links.kafka
   * Defines Kafka topics.
   */
 object Topic {
-  val cutLinkTopic       = "cut_link"
-  val retrievedLinkTopic = "retrieved_link"
+  val linkCutTopic       = "link_cut"
+  val linkRetrievedTopic = "link_retrieved"
 }

@@ -34,19 +34,24 @@ case class KafkaConnector(config: KafkaConfig) {
       config.bootstrapServers
     ) // TODO: Replace with discovery in the future
 
-  def consumer(topic: String)(implicit
+  def consumer(topic: String, consumerGroup: String)(implicit
       as: ActorSystem
   ): Source[(ConsumerRecord[String, String], CommittableOffset), Control] =
     Consumer
-      .sourceWithOffsetContext(consumerSettings, Subscriptions.topics(topic))
+      .sourceWithOffsetContext(
+        consumerSettings(consumerGroup),
+        Subscriptions.topics(topic)
+      )
       .asSource
 
-  private def consumerSettings(implicit as: ActorSystem) =
+  private def consumerSettings(
+      consumerGroup: String
+  )(implicit as: ActorSystem) =
     ConsumerSettings(
       as,
       new StringDeserializer,
       new StringDeserializer
-    ).withGroupId("link_store")
+    ).withGroupId(consumerGroup)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
       .withBootstrapServers(
         config.bootstrapServers

@@ -1,7 +1,7 @@
 import Dependencies._
 import com.typesafe.sbt.packager.Keys.dockerBaseImage
 import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
-import sbt.Keys.{libraryDependencies, name}
+import sbt.Keys.{libraryDependencies, _}
 import sbt._
 
 object Projects {
@@ -34,7 +34,7 @@ object Projects {
     .dependsOn(Common.config)
     .dependsOn(Common.logging)
 
-  lazy val `link-store` = project.dockerize
+  lazy val `link-store` = project.dockerize.includeContainerTests
     .settings(
       name := "link-store",
       libraryDependencies ++= Kit.scalatest,
@@ -48,6 +48,16 @@ object Projects {
     .dependsOn(Common.links)
     .dependsOn(Common.config)
     .dependsOn(Common.logging)
+
+  lazy val `integration-tests` = project.includeContainerTests
+    .settings(
+      name := "integration-tests",
+      libraryDependencies ++= Kit.scalatest,
+      libraryDependencies += akkaStreamTestkit,
+      libraryDependencies += akkaHttpTestkit
+    )
+    .dependsOn(`cut-link`)
+    .dependsOn(`link-store`)
 
   object Common {
     lazy val config = project
@@ -66,11 +76,13 @@ object Projects {
         libraryDependencies ++= Kit.scalatest
       )
 
-    lazy val links = project
+    lazy val links = project.includeContainerTests
       .settings(
         name := "links",
-        libraryDependencies += akkaStreamKafka % Provided,
-        libraryDependencies += sangriaGraphql  % Provided
+        libraryDependencies += akkaStreamKafka,
+        libraryDependencies += sangriaGraphql % Provided,
+        libraryDependencies ++= Kit.scalatest,
+        libraryDependencies += scribeSlf4j % Test
       )
   }
 
@@ -79,6 +91,12 @@ object Projects {
       .enablePlugins(JavaAppPackaging)
       .settings(
         dockerBaseImage := "openjdk:14"
+      )
+
+    def includeContainerTests: Project = project
+      .settings(
+        Test / fork := true,
+        libraryDependencies ++= Kit.testcontainers
       )
   }
 }

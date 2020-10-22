@@ -2,9 +2,9 @@ package cut.link.schema
 
 import java.time.format.DateTimeFormatter
 
-import cut.link.model.Link
 import cut.link.service.LinkService
 import io.circe.generic.auto._
+import links.model.Link
 import sangria.macros.derive._
 import sangria.marshalling.circe._
 import sangria.schema._

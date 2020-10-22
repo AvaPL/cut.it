@@ -16,43 +16,54 @@ class GraphQlTest
     with Matchers
     with ScalatestRouteTest
     with MockFactory {
+
+  val testUri = "http://test.com"
+
   "GraphQl" when {
     "sending POST to /graphql" should {
       "respond with 200 OK and return entity" in {
-        val mockKafkaConnector = mock[KafkaConnector]
-        (mockKafkaConnector
-          .producer(_: ActorSystem))
-          .expects(*)
-          .returning(Sink.ignore)
-        val ignoreFlow  = LinkMessageFlow(mockKafkaConnector)
-        val linkService = LinkService(ignoreFlow)
-        val graphql     = GraphQl(linkService)
-        val uri         = "http://test.com"
-        val query =
-          s"""{
-             | "query": "mutation($$uri: String!) { cutLink(uri: $$uri) { uri } }",
-             | "variables": {
-             |   "uri": "$uri"
-             | }
-             |}
-             |""".stripMargin
-        val entity = HttpEntity(ContentTypes.`application/json`, query)
-        val expectedEntity =
-          s"""
-             |{
-             |  "data": {
-             |    "cutLink": {
-             |      "uri": "$uri"
-             |    }
-             |  }
-             |}
-             |""".stripMargin.replaceAll("\\s", "")
+        val graphQl                     = mockedGraphQl
+        val (request, expectedResponse) = testCutLinkMutation
+        val requestEntity               = HttpEntity(ContentTypes.`application/json`, request)
 
-        Post("/graphql", entity) ~> graphql.route ~> check {
+        Post("/graphql", requestEntity) ~> graphQl.route ~> check {
           status should be(StatusCodes.OK)
-          responseAs[String] should be(expectedEntity)
+          responseAs[String] should be(expectedResponse)
         }
       }
     }
+  }
+
+  private def mockedGraphQl = {
+    val mockKafkaConnector = mock[KafkaConnector]
+    (mockKafkaConnector
+      .producer(_: ActorSystem))
+      .expects(*)
+      .returning(Sink.ignore)
+    val ignoreFlow  = LinkMessageFlow(mockKafkaConnector)
+    val linkService = LinkService(ignoreFlow)
+    GraphQl(linkService)
+  }
+
+  private def testCutLinkMutation = {
+    val mutation =
+      s"""{
+         | "query": "mutation($$uri: String!) { cutLink(uri: $$uri) { uri } }",
+         | "variables": {
+         |   "uri": "$testUri"
+         | }
+         |}
+         |""".stripMargin
+    val response =
+      s"""
+         |{
+         |  "data": {
+         |    "cutLink": {
+         |      "uri": "$testUri"
+         |    }
+         |  }
+         |}
+         |""".stripMargin.replaceAll("\\s", "")
+    (mutation, response)
   }
 }
