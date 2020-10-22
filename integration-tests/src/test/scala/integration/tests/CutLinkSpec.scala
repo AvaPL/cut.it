@@ -83,9 +83,15 @@ class CutLinkSpec extends IntegrationTest {
   ) = {
     implicit val scheduler: Scheduler = system.scheduler
     val linkFuture = EitherT(
-      retry(() => retrieveEsLink(elasticConnector, documentId), 10, 1.second)
+      retry(
+        () => retrieveEsLink(elasticConnector, documentId),
+        10,
+        1.second,
+        2.seconds,
+        0.5
+      )
     ).rethrowT
-    val retrievedLink = Await.result(linkFuture, 10.seconds)
+    val retrievedLink = Await.result(linkFuture, 30.seconds)
     retrievedLink
   }
 
