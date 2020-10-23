@@ -28,8 +28,8 @@ class RetrieveLinkSpec extends IntegrationTest {
           val kafkaConnector   = testKafkaConnector(kafka)
           val elasticConnector = testElasticConnector(elasticsearch)
           val testLink         = Link("testId", "https://github.com/AvaPL")
-
           indexLink(elasticConnector, testLink)
+
           val linkRetrievalService =
             startLinkRetrievedFlow(kafkaConnector, elasticConnector)
           sendRetrievalRequest(linkRetrievalService, testLink)
