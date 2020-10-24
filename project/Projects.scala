@@ -73,7 +73,8 @@ object Projects {
         name := "logging",
         libraryDependencies += scribeSlf4j,
         libraryDependencies ++= Kit.akkaHttp,
-        libraryDependencies ++= Kit.scalatest
+        libraryDependencies ++= Kit.scalatest,
+        libraryDependencies ++= Kit.sangria
       )
 
     lazy val links = project.includeContainerTests
