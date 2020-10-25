@@ -7,7 +7,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import scribe.Level._
 
 class LoggingServiceTest extends AnyWordSpec with Matchers {
-  val servicePackage = "filter.test"
+  val servicePackage = "service.test"
 
   "LoggingService" when {
     "started" should {

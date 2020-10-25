@@ -1,89 +1,38 @@
 package logging
 
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import org.scalatest.BeforeAndAfterEach
+import logging.filter.ServiceFilter
+import logging.model.levels.Levels
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import scribe.Level._
 
-class LoggingTest
-    extends AnyWordSpec
-    with Matchers
-    with BeforeAndAfterEach
-    with ScalatestRouteTest {
+class LoggingTest extends AnyWordSpec with Matchers {
 
-  // TODO: Add tests
+  "Logging" when {
+    "started" should {
+      s"set scribe to service level WARN and libraries level DEBUG" in {
+        val loggingServicePackage = "logging.test"
+        val loggingDefaultLoggingLevels =
+          Levels(service = Warn, libraries = Debug)
 
-//  var logging: Logging = newLogging
-//
-//  override protected def afterEach(): Unit =
-//    try super.afterEach()
-//    finally logging = newLogging
-//
-//  private def newLogging: App with Logging = new Object with App with Logging {
-//    override def enableLoggingServer: Boolean      = false
-//    override def defaultMinimumLoggingLevel: Level = Error
-//  }
-//
-//  "Logging" when {
-//    "started" should {
-//      s"include ${logging.defaultMinimumLoggingLevel} logging level" in {
-//        scribeLevelShouldBe(logging.defaultMinimumLoggingLevel)
-//      }
-//    }
-//
-//    "sending POST to /logging" should {
-//      val levels = List(Trace, Debug, Info, Warn, Error)
-//
-//      "change logging level for each possible level" in {
-//        for (level <- levels)
-//          Post(
-//            "/logging",
-//            minimumLevelEntity(level.name)
-//          ) ~> logging.loggingRoute ~> check {
-//            status should be(StatusCodes.NoContent)
-//            scribeLevelShouldBe(level)
-//          }
-//      }
-//
-//      "change logging level ignoring letter case" in {
-//        for (level <- levels)
-//          Post(
-//            "/logging",
-//            minimumLevelEntity(level.name.toLowerCase.capitalize)
-//          ) ~> logging.loggingRoute ~> check {
-//            status should be(StatusCodes.NoContent)
-//            scribeLevelShouldBe(level)
-//          }
-//      }
-//
-//      "ignore invalid logging level" in {
-//        Post(
-//          "/logging",
-//          minimumLevelEntity("invalid")
-//        ) ~> logging.loggingRoute ~> check {
-//          status should be(StatusCodes.BadRequest)
-//          scribeLevelShouldBe(logging.defaultMinimumLoggingLevel)
-//        }
-//      }
-//    }
-//  }
-//
-//  private def scribeLevelShouldBe(level: Level) = {
-//    scribe.Logger.root.includes(level) should be(true)
-//    scribe.Logger.root.includes(
-//      Level(
-//        "excluded",
-//        // 1 point difference is enough, predefined levels values interval is 100
-//        level.value - 1
-//      )
-//    ) should be(false)
-//  }
-//
-//  private def minimumLevelEntity(minimumLevel: String) = {
-//    val json = s"""|{
-//                   |  "minimumLevel": "$minimumLevel"
-//                   |}
-//                   |""".stripMargin
-//    HttpEntity(ContentTypes.`application/json`, json)
-//  }
+        new Object with App with Logging {
+          override def enableLoggingServer: Boolean = false
+          override def servicePackage               = loggingServicePackage
+          override def defaultLoggingLevels         = loggingDefaultLoggingLevels
+        }
+
+        checkServiceFilter(loggingServicePackage, loggingDefaultLoggingLevels)
+      }
+    }
+  }
+
+  private def checkServiceFilter(servicePackage: String, levels: Levels) = {
+    val serviceFilter =
+      scribe.Logger.root.modifiers.find(_.id == ServiceFilter.id) match {
+        case Some(filter: ServiceFilter) => filter
+        case _                           => fail("ServiceFilter not found on scribe logger")
+      }
+    serviceFilter.servicePackage should be(servicePackage)
+    serviceFilter.levels should be(levels)
+  }
 }

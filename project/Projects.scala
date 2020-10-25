@@ -84,9 +84,7 @@ object Projects {
       .settings(
         name := "logging",
         libraryDependencies += scribeSlf4j,
-        libraryDependencies ++= Kit.scalatest,
-        libraryDependencies += akkaStreamTestkit,
-        libraryDependencies += akkaHttpTestkit
+        libraryDependencies ++= Kit.scalatest
       )
       .dependsOn(graphql)
 

@@ -35,7 +35,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers with MockFactory {
   val linkService: LinkService    = LinkService(ignoreFlow)
 
   "SchemaDefinition" when {
-    "received cut link mutation" should {
+    "receives cut link mutation" should {
       "cut link" in {
         val uri = "http://test.com"
 
@@ -52,14 +52,13 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers with MockFactory {
     Await.result(queryFuture, 10.seconds)
   }
 
-  private def query(userQuery: Document, variables: Json) =
-    Executor
-      .execute(
-        schema = schema,
-        queryAst = userQuery,
-        variables = variables,
-        userContext = linkService
-      )
+  private def query(document: Document, variables: Json) =
+    Executor.execute(
+      schema = schema,
+      queryAst = document,
+      variables = variables,
+      userContext = linkService
+    )
 
   private def cutLinkMutation =
     graphql"""
@@ -89,6 +88,6 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers with MockFactory {
   ) =
     json.hcursor.downField("data").get[T](field) match {
       case Right(value)  => value
-      case Left(failure) => throw new RuntimeException(failure.message)
+      case Left(failure) => sys.error(failure.message)
     }
 }
