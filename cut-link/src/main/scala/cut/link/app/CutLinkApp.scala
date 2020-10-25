@@ -25,4 +25,6 @@ object CutLinkApp extends App with Config[CutLinkConfig] with Logging {
 
   Http().newServerAt("0.0.0.0", config.port).bind(route)
   scribe.info(s"cut-link server started at port ${config.port}")
+
+  override def servicePackage = "cut.link"
 }

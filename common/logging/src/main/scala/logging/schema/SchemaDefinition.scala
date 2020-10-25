@@ -12,20 +12,20 @@ import sangria.marshalling.{
 import sangria.schema._
 
 object SchemaDefinition {
-  private val packageField            = "package"
-  private val packageFieldDescription = "Logging level for service package"
+  private val serviceField            = "service"
+  private val serviceFieldDescription = "Logging level for the service package"
   private val librariesField          = "libraries"
   private val librariesFieldDescription =
-    "Logging level for libraries outside service package"
+    "Logging level for libraries outside the service package"
 
   val LevelsType: ObjectType[Unit, Levels] = ObjectType(
     "Levels",
     fields[Unit, Levels](
       Field(
-        packageField,
+        serviceField,
         StringType,
-        description = Some(packageFieldDescription),
-        resolve = _.value.`package`.name
+        description = Some(serviceFieldDescription),
+        resolve = _.value.service.name
       ),
       Field(
         librariesField,
@@ -53,9 +53,9 @@ object SchemaDefinition {
       "LevelsChangeInput",
       List(
         InputField(
-          packageField,
+          serviceField,
           OptionInputType(StringType),
-          packageFieldDescription
+          serviceFieldDescription
         ),
         InputField(
           librariesField,
@@ -70,22 +70,23 @@ object SchemaDefinition {
         CoercedScalaResultMarshaller.default
 
       override def fromResult(node: marshaller.Node): LevelsChange = {
-        val fields    = node.asInstanceOf[Map[String, Any]]
-        val `package` = fields.get(packageField).map(_.toString)
-        val libraries = fields.get(librariesField).map(_.toString)
-        LevelsChange(`package`, libraries)
+        val fields    = node.asInstanceOf[Map[String, Option[String]]]
+        val service   = fields.get(serviceField).flatten
+        val libraries = fields.get(librariesField).flatten
+        LevelsChange.fromStrings(service, libraries)
       }
     }
   val LevelsArgument: Argument[LevelsChange] =
     Argument("levelsChangeInput", LevelsChangeInputType)
   val MutationType: ObjectType[LoggingService, Unit] = ObjectType(
     "Mutation",
+    "Changes current logging levels",
     fields[LoggingService, Unit](
       Field(
         "changeLevels",
         LevelsType,
         arguments = LevelsArgument :: Nil,
-        resolve = c => c.ctx.setMinimumLoggingLevels(c.arg(LevelsArgument))
+        resolve = c => c.ctx.changeLevels(c.arg(LevelsArgument))
       )
     )
   )

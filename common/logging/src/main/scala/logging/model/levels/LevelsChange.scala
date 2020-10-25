@@ -4,16 +4,16 @@ import scribe.Level
 import scribe.Level.{Debug, Error, Info, Trace, Warn}
 
 case class LevelsChange(
-    `package`: Option[Level] = None,
+    service: Option[Level] = None,
     libraries: Option[Level] = None
 )
 
 object LevelsChange {
-  def apply(
-      `package`: Option[String] = None,
+  def fromStrings(
+      service: Option[String] = None,
       libraries: Option[String] = None
   ): LevelsChange =
-    LevelsChange(`package`.flatMap(parseLevel), libraries.flatMap(parseLevel))
+    LevelsChange(service.flatMap(parseLevel), libraries.flatMap(parseLevel))
 
   private def parseLevel(level: String) =
     level.toUpperCase match {

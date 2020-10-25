@@ -2,18 +2,19 @@ package logging
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import io.circe.Json
-import io.circe.generic.auto._
-import scribe.Level
-import scribe.Level.{Debug, Error, Info, Trace, Warn}
+import logging.http.route.{GraphQl, GraphiQl}
+import logging.model.levels.Levels
+import logging.service.LoggingService
+import scribe.Level.{Info, Warn}
+
+import scala.concurrent.ExecutionContextExecutor
 
 /**
   * Trait that allows a class to log messages using scribe. It also starts
   * a config server at 0.0.0.0:1065 that allows dynamical logging level
-  * change. To change logging level use POST on /logging endpoint.
+  * change. To change logging level use GraphiQL interface on /graphiql
+  * endpoint.
   *
   * Supported logging levels are:
   *  - trace
@@ -23,9 +24,20 @@ import scribe.Level.{Debug, Error, Info, Trace, Warn}
   *  - error
   *
   * @example {{{
-  * POST /logging
-  * {
-  *   "minimumLevel": "warn"
+  * query {
+  *   levels {
+  *     service
+  *     libraries
+  *   }
+  * }
+  * }}}
+  *
+  * @example {{{
+  * mutation {
+  *   changeLevels(levelsChangeInput: {service: "info", libraries: "warn"}) {
+  *     service
+  *     libraries
+  *   }
   * }
   * }}}
   */
@@ -33,71 +45,35 @@ trait Logging {
   this: App =>
 
   private implicit val system: ActorSystem = ActorSystem("logging")
+  private implicit val executionContext: ExecutionContextExecutor =
+    system.dispatcher
 
-  // Additional final modifier is used because of scope leakage:
-  // https://github.com/scala/bug/issues/11339
-  private[logging] final val loggingRoute = path("logging") {
-    post {
-      entity(as[ScribeSettings]) { settings =>
-        setLoggingSettings(settings)
-      }
-    }
-  }
+  private val loggingService =
+    LoggingService(servicePackage, defaultLoggingLevels)
 
-  setMinimumLoggingLevel(defaultMinimumLoggingLevel)
+  /**
+    * The root package for which `service` level will be used.
+    */
+  def servicePackage: String
+
+  /**
+    * Default logging level for the service package and for libraries outside
+    * the service package.
+    */
+  def defaultLoggingLevels: Levels = Levels(service = Info, libraries = Warn)
+
+  loggingService.changeLevels(defaultLoggingLevels)
   if (enableLoggingServer) {
-    Http().newServerAt("0.0.0.0", 1065).bind(loggingRoute)
+    Http().newServerAt("0.0.0.0", 1065).bind(route)
     scribe.info("Logging server started")
   }
 
-  def defaultMinimumLoggingLevel: Level = Info
-
   /**
-    * Determines if the logging server should be started, defaults to `true`. It
-    * is only invoked on init so it should be overridden in derived classes if
-    * other behavior is desired.
+    * Determines if the logging server should be started, defaults to `true`.
+    * It is only invoked on init so it should be overridden in derived classes
+    * if other behavior is desired.
     */
   def enableLoggingServer: Boolean = true
 
-  private def setLoggingSettings(settings: ScribeSettings) = {
-    val minimumLevel = parseMinimumLevel(settings.minimumLevel)
-    if (minimumLevel.isDefined) {
-      setMinimumLoggingLevel(minimumLevel.get)
-      complete(StatusCodes.NoContent)
-    } else
-      complete(
-        StatusCodes.BadRequest,
-        minimumLevelErrorJson(settings.minimumLevel)
-      )
-  }
-
-  private def parseMinimumLevel(minimumLevel: String) =
-    minimumLevel.toUpperCase match {
-      case Trace.name => Some(Trace)
-      case Debug.name => Some(Debug)
-      case Info.name  => Some(Info)
-      case Warn.name  => Some(Warn)
-      case Error.name => Some(Error)
-      case _          => None
-    }
-
-  def setMinimumLoggingLevel(minimumLevel: Level): Unit = {
-    scribe.Logger.root
-      .clearHandlers()
-      .withHandler(minimumLevel = Some(minimumLevel))
-      .replace()
-    scribe.info(s"Minimum logging level set to: ${minimumLevel.name}")
-  }
-
-  private def minimumLevelErrorJson(invalidLevel: String) =
-    Json.obj(
-      (
-        "error",
-        Json.fromString(
-          s"minimumLevel must be in [${List(Trace, Debug, Info, Warn, Error)
-            .map(_.name)
-            .mkString(", ")}] but was '$invalidLevel'"
-        )
-      )
-    )
+  private def route = GraphQl(loggingService).route ~ GraphiQl.route
 }

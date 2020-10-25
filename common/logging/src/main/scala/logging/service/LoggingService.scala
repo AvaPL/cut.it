@@ -1,16 +1,38 @@
 package logging.service
 
+import logging.filter.ServiceFilter
 import logging.model.levels.{Levels, LevelsChange}
-import scribe.Level._
+import scribe.handler.LogHandler
 
-case class LoggingService() {
-  def setMinimumLoggingLevels(levelsChange: LevelsChange): Levels = {
-    // TODO: Implement
-    println(levelsChange)
-    Levels(Info, Info)
+case class LoggingService(
+    servicePackage: String,
+    private var _currentLevels: Levels
+) {
+
+  def changeLevels(levelsChange: LevelsChange): Levels = {
+    val service   = levelsChange.service.getOrElse(currentLevels.service)
+    val libraries = levelsChange.libraries.getOrElse(currentLevels.libraries)
+    val levels    = Levels(service, libraries)
+    changeLevels(levels)
   }
 
-  def currentLevels: Levels =
-    // TODO: Implement
-    Levels(Info, Info)
+  def changeLevels(levels: Levels): Levels = {
+    replaceScribeLogger(levels)
+    _currentLevels = levels
+    scribe.info(
+      s"Logging levels set to [service: ${_currentLevels.service}, libraries: ${_currentLevels.libraries}]"
+    )
+    _currentLevels
+  }
+
+  private def replaceScribeLogger(levels: Levels) = {
+    val filter = ServiceFilter(servicePackage, levels)
+    scribe.Logger.root
+      .clearHandlers()
+      .withHandler(LogHandler.default)
+      .setModifiers(List(filter))
+      .replace()
+  }
+
+  def currentLevels: Levels = _currentLevels
 }

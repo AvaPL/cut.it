@@ -15,12 +15,11 @@ import sangria.validation.{QueryValidator, Violation}
 
 import scala.concurrent.ExecutionContext
 
-// TODO: Move common parts to links module
+// TODO: Move common parts to graphql module
 case class GraphQl(loggingService: LoggingService)(implicit
     ec: ExecutionContext
 ) {
-  // TODO: Extract path name to a separate variable and move this val as common part
-  val route: Route = path("logging") {
+  val route: Route = path("graphql") {
     post {
       entity(as[Json]) { request =>
         graphqlEndpoint(request)
