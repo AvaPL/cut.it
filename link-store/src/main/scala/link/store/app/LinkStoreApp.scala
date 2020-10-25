@@ -7,7 +7,7 @@ import kafka.KafkaConnector
 import link.store.config.LinkStoreConfig
 import link.store.elasticsearch.ElasticConnector
 import link.store.flow.{LinkRetrievedMessageFlow, SaveLinkFlow}
-import link.store.http.LinkRetrievalService
+import link.store.service.LinkRetrievalService
 import logging.Logging
 import pureconfig.generic.auto._
 

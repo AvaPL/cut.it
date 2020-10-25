@@ -1,4 +1,4 @@
-package link.store.http
+package link.store.service
 
 import akka.Done
 import akka.actor.ActorSystem

@@ -13,7 +13,7 @@ import io.circe.syntax._
 import kafka.KafkaConnector
 import link.store.elasticsearch.ElasticConnector
 import link.store.flow.LinkRetrievedMessageFlow
-import link.store.http.LinkRetrievalService
+import link.store.service.LinkRetrievalService
 import links.elasticsearch.Index
 import links.kafka.Topic
 import links.model.Link
