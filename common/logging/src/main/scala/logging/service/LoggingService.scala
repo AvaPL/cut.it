@@ -6,8 +6,10 @@ import scribe.handler.LogHandler
 
 case class LoggingService(
     servicePackage: String,
-    private var _currentLevels: Levels
+    initialLevels: Levels
 ) {
+  private var _currentLevels = initialLevels
+  replaceScribeLogger(_currentLevels)
 
   def changeLevels(levelsChange: LevelsChange): Levels = {
     val service   = levelsChange.service.getOrElse(currentLevels.service)

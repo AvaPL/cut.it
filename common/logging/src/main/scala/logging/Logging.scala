@@ -63,7 +63,6 @@ trait Logging {
     */
   def defaultLoggingLevels: Levels = Levels(service = Info, libraries = Warn)
 
-  loggingService.changeLevels(defaultLoggingLevels)
   if (enableLoggingServer) {
     Http().newServerAt("0.0.0.0", 1065).bind(route)
     scribe.info("Logging server started")
