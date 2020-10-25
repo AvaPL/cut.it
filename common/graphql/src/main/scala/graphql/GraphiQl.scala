@@ -1,9 +1,8 @@
-package logging.http.route
+package graphql
 
 import akka.http.scaladsl.server.Directives.{get, getFromResource, path}
 import akka.http.scaladsl.server.Route
 
-// TODO: Move common parts to graphql module
 object GraphiQl {
   val route: Route = path("graphiql") {
     get {

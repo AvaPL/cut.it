@@ -5,9 +5,10 @@ import akka.kafka.CommitterSettings
 import akka.kafka.ConsumerMessage.CommittableOffset
 import akka.kafka.scaladsl.Committer
 import akka.stream.scaladsl.Flow
+import kafka.KafkaConnector
 import link.store.elasticsearch.ElasticConnector
 import links.elasticsearch.Index
-import links.kafka.{ConsumerGroup, KafkaConnector, Topic}
+import links.kafka.{ConsumerGroup, Topic}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 
 case class SaveLinkFlow(

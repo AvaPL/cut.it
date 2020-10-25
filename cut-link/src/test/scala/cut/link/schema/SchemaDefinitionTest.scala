@@ -7,7 +7,7 @@ import cut.link.service.LinkService
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.{Decoder, Json}
-import links.kafka.KafkaConnector
+import kafka.KafkaConnector
 import links.model.Link
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers

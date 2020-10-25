@@ -8,7 +8,7 @@ import akka.stream.scaladsl.Sink
 import akka.testkit.TestProbe
 import io.circe.generic.auto._
 import io.circe.parser._
-import links.kafka.KafkaConnector
+import kafka.KafkaConnector
 import links.model.Link
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.scalamock.scalatest.MockFactory

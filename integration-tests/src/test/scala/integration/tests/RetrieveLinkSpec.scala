@@ -10,11 +10,12 @@ import integration.tests.common.IntegrationTest
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax._
+import kafka.KafkaConnector
 import link.store.elasticsearch.ElasticConnector
 import link.store.flow.LinkRetrievedMessageFlow
 import link.store.http.LinkRetrievalService
 import links.elasticsearch.Index
-import links.kafka.{KafkaConnector, Topic}
+import links.kafka.Topic
 import links.model.Link
 
 import scala.concurrent.Await

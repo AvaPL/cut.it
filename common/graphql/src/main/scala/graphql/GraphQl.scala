@@ -1,21 +1,22 @@
-package cut.link.http
+package graphql
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import cut.link.schema.SchemaDefinition
-import cut.link.service.LinkService
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.Json
 import sangria.ast.Document
 import sangria.execution.Executor
 import sangria.marshalling.circe._
 import sangria.parser.QueryParser
+import sangria.schema.Schema
 import sangria.validation.{QueryValidator, Violation}
 
 import scala.concurrent.ExecutionContext
 
-case class GraphQl(linkService: LinkService)(implicit ec: ExecutionContext) {
+case class GraphQl[Ctx](schema: Schema[Ctx, Unit], context: Ctx)(implicit
+    ec: ExecutionContext
+) {
   val route: Route = path("graphql") {
     post {
       entity(as[Json]) { request =>
@@ -61,10 +62,7 @@ case class GraphQl(linkService: LinkService)(implicit ec: ExecutionContext) {
     }
 
   private def validateQuery(queryAst: Document) =
-    QueryValidator.default.validateQuery(
-      SchemaDefinition.schema,
-      queryAst
-    )
+    QueryValidator.default.validateQuery(schema, queryAst)
 
   private def executeQuery(
       queryAst: Document,
@@ -81,9 +79,9 @@ case class GraphQl(linkService: LinkService)(implicit ec: ExecutionContext) {
          |""".stripMargin
     )
     Executor.execute(
-      SchemaDefinition.schema,
+      schema,
       queryAst,
-      linkService,
+      context,
       variables = variables,
       operationName = operation
     )

@@ -1,4 +1,4 @@
-package links.kafka
+package kafka
 
 import akka.Done
 import akka.actor.ActorSystem

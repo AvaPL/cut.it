@@ -3,8 +3,9 @@ package logging
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
-import logging.http.route.{GraphQl, GraphiQl}
+import graphql.{GraphQl, GraphiQl}
 import logging.model.levels.Levels
+import logging.schema.SchemaDefinition
 import logging.service.LoggingService
 import scribe.Level.{Info, Warn}
 
@@ -75,5 +76,6 @@ trait Logging {
     */
   def enableLoggingServer: Boolean = true
 
-  private def route = GraphQl(loggingService).route ~ GraphiQl.route
+  private def route =
+    GraphQl(SchemaDefinition.schema, loggingService).route ~ GraphiQl.route
 }

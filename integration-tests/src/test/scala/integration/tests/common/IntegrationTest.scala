@@ -1,12 +1,12 @@
 package integration.tests.common
 
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import com.dimafeng.testcontainers.{ElasticsearchContainer, KafkaContainer}
 import com.dimafeng.testcontainers.lifecycle.and
 import com.dimafeng.testcontainers.scalatest.TestContainersForAll
+import com.dimafeng.testcontainers.{ElasticsearchContainer, KafkaContainer}
+import kafka.{KafkaConfig, KafkaConnector}
 import link.store.config.{BulkConfig, ElasticConfig}
 import link.store.elasticsearch.ElasticConnector
-import links.kafka.{KafkaConfig, KafkaConnector}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
