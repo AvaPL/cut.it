@@ -1,4 +1,4 @@
-package links.kafka
+package kafka
 
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.{Flow, Sink, Source}

@@ -23,4 +23,6 @@ object Server extends App with Config[ServerConfig] with Logging {
   scribe.info(s"GraphQL server started at port ${config.port}")
 
   override def defaultConfig = ServerConfig(port = 8080)
+
+  override def servicePackage = "basic.graphql"
 }

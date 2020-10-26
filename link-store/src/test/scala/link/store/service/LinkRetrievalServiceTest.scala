@@ -1,4 +1,4 @@
-package link.store.http
+package link.store.service
 
 import akka.Done
 import akka.actor.ActorSystem
@@ -8,13 +8,13 @@ import akka.http.scaladsl.server.MethodRejection
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.stream.scaladsl.Sink
 import akka.testkit.TestProbe
-import io.circe.syntax._
 import io.circe.generic.auto._
 import io.circe.parser.decode
+import io.circe.syntax._
+import kafka.KafkaConnector
 import link.store.elasticsearch.ElasticConnector
 import link.store.flow.LinkRetrievedMessageFlow
 import links.elasticsearch.Index
-import links.kafka.KafkaConnector
 import links.model.Link
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.scalamock.scalatest.MockFactory

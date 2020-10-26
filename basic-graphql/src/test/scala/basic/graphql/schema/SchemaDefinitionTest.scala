@@ -74,7 +74,7 @@ class SchemaDefinitionTest extends AnyWordSpec with Matchers {
       }
     }
 
-    "received users mutation" should {
+    "receives users mutation" should {
 
       val createUserMutation =
         graphql"""

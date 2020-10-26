@@ -10,11 +10,12 @@ import integration.tests.common.IntegrationTest
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax._
+import kafka.KafkaConnector
 import link.store.elasticsearch.ElasticConnector
 import link.store.flow.LinkRetrievedMessageFlow
-import link.store.http.LinkRetrievalService
+import link.store.service.LinkRetrievalService
 import links.elasticsearch.Index
-import links.kafka.{KafkaConnector, Topic}
+import links.kafka.Topic
 import links.model.Link
 
 import scala.concurrent.Await
@@ -28,8 +29,8 @@ class RetrieveLinkSpec extends IntegrationTest {
           val kafkaConnector   = testKafkaConnector(kafka)
           val elasticConnector = testElasticConnector(elasticsearch)
           val testLink         = Link("testId", "https://github.com/AvaPL")
-
           indexLink(elasticConnector, testLink)
+
           val linkRetrievalService =
             startLinkRetrievedFlow(kafkaConnector, elasticConnector)
           sendRetrievalRequest(linkRetrievalService, testLink)

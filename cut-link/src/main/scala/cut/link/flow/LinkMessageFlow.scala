@@ -6,7 +6,8 @@ import akka.stream.scaladsl.{Flow, Source, SourceQueueWithComplete}
 import akka.stream.{OverflowStrategy, QueueOfferResult}
 import io.circe.generic.auto._
 import io.circe.syntax._
-import links.kafka.{KafkaConnector, Topic}
+import kafka.KafkaConnector
+import links.kafka.Topic
 import links.model.Link
 import org.apache.kafka.clients.producer.ProducerRecord
 

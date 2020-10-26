@@ -1,7 +1,7 @@
 import Dependencies._
 import com.typesafe.sbt.packager.Keys.dockerBaseImage
 import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
-import sbt.Keys.{libraryDependencies, _}
+import sbt.Keys._
 import sbt._
 
 object Projects {
@@ -33,6 +33,8 @@ object Projects {
     .dependsOn(Common.links)
     .dependsOn(Common.config)
     .dependsOn(Common.logging)
+    .dependsOn(Common.kafka)
+    .dependsOn(Common.graphql)
 
   lazy val `link-store` = project.dockerize.includeContainerTests
     .settings(
@@ -48,6 +50,7 @@ object Projects {
     .dependsOn(Common.links)
     .dependsOn(Common.config)
     .dependsOn(Common.logging)
+    .dependsOn(Common.kafka)
 
   lazy val `integration-tests` = project.includeContainerTests
     .settings(
@@ -68,21 +71,35 @@ object Projects {
         libraryDependencies ++= Kit.scalatest
       )
 
+    lazy val graphql = project
+      .settings(
+        name := "graphql",
+        libraryDependencies ++= Kit.sangria,
+        libraryDependencies ++= Kit.akkaHttp,
+        libraryDependencies += scribeSlf4j % Provided,
+        libraryDependencies ++= Kit.scalatest
+      )
+
     lazy val logging = project
       .settings(
         name := "logging",
         libraryDependencies += scribeSlf4j,
-        libraryDependencies ++= Kit.akkaHttp,
         libraryDependencies ++= Kit.scalatest
       )
+      .dependsOn(graphql)
 
-    lazy val links = project.includeContainerTests
+    lazy val kafka = project.includeContainerTests
       .settings(
-        name := "links",
+        name := "kafka",
         libraryDependencies += akkaStreamKafka,
-        libraryDependencies += sangriaGraphql % Provided,
         libraryDependencies ++= Kit.scalatest,
         libraryDependencies += scribeSlf4j % Test
+      )
+
+    lazy val links = project
+      .settings(
+        name := "links",
+        libraryDependencies += sangriaGraphql % Provided
       )
   }
 

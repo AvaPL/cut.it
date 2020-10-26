@@ -3,11 +3,11 @@ package link.store.app
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import config.Config
+import kafka.KafkaConnector
 import link.store.config.LinkStoreConfig
 import link.store.elasticsearch.ElasticConnector
 import link.store.flow.{LinkRetrievedMessageFlow, SaveLinkFlow}
-import link.store.http.LinkRetrievalService
-import links.kafka.KafkaConnector
+import link.store.service.LinkRetrievalService
 import logging.Logging
 import pureconfig.generic.auto._
 
@@ -26,4 +26,6 @@ object LinkStoreApp extends App with Config[LinkStoreConfig] with Logging {
 
   Http().newServerAt("0.0.0.0", config.port).bind(route)
   scribe.info(s"link-store server started at port ${config.port}")
+
+  override def servicePackage = "link.store"
 }

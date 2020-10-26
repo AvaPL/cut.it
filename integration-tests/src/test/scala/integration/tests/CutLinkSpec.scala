@@ -7,17 +7,18 @@ import cats.data.EitherT
 import cats.implicits._
 import com.dimafeng.testcontainers.lifecycle._
 import cut.link.flow.LinkMessageFlow
-import cut.link.http.GraphQl
+import cut.link.schema.SchemaDefinition
 import cut.link.service.LinkService
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import graphql.GraphQl
 import integration.tests.common.IntegrationTest
 import io.circe.Json
 import io.circe.generic.auto._
 import io.circe.parser.decode
+import kafka.KafkaConnector
 import link.store.elasticsearch.ElasticConnector
 import link.store.flow.SaveLinkFlow
 import links.elasticsearch.Index
-import links.kafka.KafkaConnector
 import links.model.Link
 
 import scala.concurrent.Await
@@ -47,10 +48,10 @@ class CutLinkSpec extends IntegrationTest {
   private def testGraphQl(kafkaConnector: KafkaConnector) = {
     val linkMessageFlow = LinkMessageFlow(kafkaConnector)
     val linkService     = LinkService(linkMessageFlow)
-    GraphQl(linkService)
+    GraphQl(SchemaDefinition.schema, linkService)
   }
 
-  private def sendGraphQlQuery(graphQl: GraphQl, uri: String) = {
+  private def sendGraphQlQuery(graphQl: GraphQl[_], uri: String) = {
     val mutation   = cutLinkMutation(uri)
     val httpEntity = HttpEntity(ContentTypes.`application/json`, mutation)
     Post("/graphql", httpEntity) ~> graphQl.route ~> check {

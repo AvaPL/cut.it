@@ -3,7 +3,7 @@ package cut.link.service
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.Sink
 import cut.link.flow.LinkMessageFlow
-import links.kafka.KafkaConnector
+import kafka.KafkaConnector
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec

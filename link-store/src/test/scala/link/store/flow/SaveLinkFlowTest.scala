@@ -5,9 +5,10 @@ import akka.kafka.testkit.ConsumerResultFactory
 import akka.kafka.testkit.scaladsl.ConsumerControlFactory
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import akka.testkit.TestProbe
+import kafka.KafkaConnector
 import link.store.elasticsearch.ElasticConnector
 import links.elasticsearch.Index
-import links.kafka.{ConsumerGroup, KafkaConnector, Topic}
+import links.kafka.{ConsumerGroup, Topic}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers

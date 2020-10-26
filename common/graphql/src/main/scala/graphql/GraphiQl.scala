@@ -1,4 +1,4 @@
-package cut.link.http
+package graphql
 
 import akka.http.scaladsl.server.Directives.{get, getFromResource, path}
 import akka.http.scaladsl.server.Route

@@ -1,6 +1,6 @@
 package link.store.config
 
-import links.kafka.KafkaConfig
+import kafka.KafkaConfig
 
 case class LinkStoreConfig(
     port: Int,

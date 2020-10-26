@@ -1,4 +1,4 @@
-package link.store.http
+package link.store.service
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.StatusCodes
