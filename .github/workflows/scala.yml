@@ -30,4 +30,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: scalafmt-native-formatter
-      uses: AvaPL/scalafmt-native-formatter@v0.1.0
+      uses: AvaPL/scalafmt-native-formatter@v0.1
