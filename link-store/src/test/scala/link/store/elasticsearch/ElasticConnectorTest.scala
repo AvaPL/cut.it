@@ -13,6 +13,7 @@ import link.store.config.{BulkConfig, ElasticConfig}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import org.testcontainers.utility.DockerImageName
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -26,7 +27,13 @@ class ElasticConnectorTest
   implicit val defaultBulkConfig: BulkConfig = BulkConfig(1000, 10.seconds)
 
   override val containerDef: ElasticsearchContainer.Def =
-    ElasticsearchContainer.Def("bitnami/elasticsearch")
+    ElasticsearchContainer.Def(
+      DockerImageName
+        .parse("bitnami/elasticsearch")
+        .asCompatibleSubstituteFor(
+          "docker.elastic.co/elasticsearch/elasticsearch"
+        )
+    )
 
   "ElasticConnector" when {
     "retrieving a document" should {

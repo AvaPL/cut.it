@@ -9,6 +9,7 @@ import link.store.config.{BulkConfig, ElasticConfig}
 import link.store.elasticsearch.ElasticConnector
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import org.testcontainers.utility.DockerImageName
 
 import scala.concurrent.duration._
 
@@ -22,7 +23,15 @@ trait IntegrationTest
   override def startContainers(): Containers = {
     val kafka = KafkaContainer.Def().start()
     val elasticsearch =
-      ElasticsearchContainer.Def("bitnami/elasticsearch").start()
+      ElasticsearchContainer
+        .Def(
+          DockerImageName
+            .parse("bitnami/elasticsearch")
+            .asCompatibleSubstituteFor(
+              "docker.elastic.co/elasticsearch/elasticsearch"
+            )
+        )
+        .start()
     kafka and elasticsearch
   }
 
