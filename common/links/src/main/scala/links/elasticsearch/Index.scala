@@ -1,7 +1,6 @@
 package links.elasticsearch
 
-/**
-  * Defines Elasticsearch indices.
+/** Defines Elasticsearch indices.
   */
 object Index {
   val linkStoreIndex = "link-store"

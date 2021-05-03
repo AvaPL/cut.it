@@ -47,7 +47,7 @@ object Dependencies {
       val akka           = "2.6.9"
       val elastic4s      = "7.9.1"
       val alpakkaKafka   = "2.0.5"
-      val testcontainers = "0.38.4"
+      val testcontainers = "0.39.3"
     }
 
     val scalactic                        = Common.scalatest

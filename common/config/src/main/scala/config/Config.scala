@@ -2,16 +2,14 @@ package config
 
 import pureconfig.{ConfigObjectSource, ConfigReader, ConfigSource}
 
-/**
-  * Trait that allows a class to load a config of defined type.
+/** Trait that allows a class to load a config of defined type.
   *
   * @tparam T returned config type
   */
 trait Config[T] {
   private var loadedConfig: Option[T] = None
 
-  /**
-    * Loads a config using provided `ConfigReader`. The easiest way to provide
+  /** Loads a config using provided `ConfigReader`. The easiest way to provide
     * a `ConfigReader` is to use `import pureconfig.generic.auto._`. It reads
     * the config only once so subsequent calls do not reload the config.
     *
@@ -39,8 +37,7 @@ trait Config[T] {
 
   private def className = this.getClass.getName
 
-  /**
-    * The source of config parameters, defaults to `ConfigSource.default`. It
+  /** The source of config parameters, defaults to `ConfigSource.default`. It
     * should be overridden in derived classes if other `ConfigSource` should
     * be used.
     *
@@ -48,8 +45,7 @@ trait Config[T] {
     */
   def configSource: ConfigObjectSource = ConfigSource.default
 
-  /**
-    * Default config to use if it could not be loaded from `configSource`.
+  /** Default config to use if it could not be loaded from `configSource`.
     * Throws a `RuntimeException` by default.
     *
     * @return default config of type `T`

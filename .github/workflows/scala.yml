@@ -5,6 +5,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
 
 jobs:
   compile-and-test:
@@ -15,6 +16,13 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 14.0.1
+    - name: Cache SBT
+      uses: actions/cache@v2
+      with:
+        path: | 
+          ~/.ivy2/cache
+          ~/.sbt
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt', '**/project/**') }}
     - name: Compile and test
       run: sbt test
   scalafmt:
@@ -22,4 +30,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: scalafmt-native-formatter
-      uses: AvaPL/scalafmt-native-formatter@v0.1.0
+      uses: AvaPL/scalafmt-native-formatter@v0
