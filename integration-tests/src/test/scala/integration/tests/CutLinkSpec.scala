@@ -4,7 +4,6 @@ import akka.actor.Scheduler
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
 import akka.pattern.retry
 import cats.data.EitherT
-import cats.implicits._
 import com.dimafeng.testcontainers.lifecycle._
 import cut.link.flow.LinkMessageFlow
 import cut.link.schema.SchemaDefinition

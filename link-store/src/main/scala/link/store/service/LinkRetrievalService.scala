@@ -6,7 +6,6 @@ import akka.http.scaladsl.model.headers.Location
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import cats.data.EitherT
-import cats.implicits._
 import io.circe.Error
 import io.circe.generic.auto._
 import io.circe.parser.decode
