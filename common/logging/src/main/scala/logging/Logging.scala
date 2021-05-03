@@ -11,35 +11,23 @@ import scribe.Level.{Info, Warn}
 
 import scala.concurrent.ExecutionContextExecutor
 
-/** Trait that allows a class to log messages using scribe. It also starts
-  * a config server at 0.0.0.0:1065 that allows dynamical logging level
-  * change. To change logging level use GraphiQL interface on /graphiql
-  * endpoint.
+/** Trait that allows a class to log messages using scribe. It also starts a
+  * config server at 0.0.0.0:1065 that allows dynamical logging level change. To
+  * change logging level use GraphiQL interface on /graphiql endpoint.
   *
   * Supported logging levels are:
-  *  - trace
-  *  - debug
-  *  - info
-  *  - warn
-  *  - error
+  *   - trace
+  *   - debug
+  *   - info
+  *   - warn
+  *   - error
   *
-  * @example {{{
-  * query {
-  *   levels {
-  *     service
-  *     libraries
-  *   }
-  * }
-  * }}}
+  * @example
+  *   {{{ query { levels { service libraries } } }}}
   *
-  * @example {{{
-  * mutation {
-  *   changeLevels(levelsChangeInput: {service: "info", libraries: "warn"}) {
-  *     service
-  *     libraries
-  *   }
-  * }
-  * }}}
+  * @example
+  *   {{{ mutation { changeLevels(levelsChangeInput: {service: "info",
+  *   libraries: "warn"}) { service libraries } } }}}
   */
 trait Logging {
   this: App =>
@@ -65,9 +53,9 @@ trait Logging {
     scribe.info("Logging server started")
   }
 
-  /** Determines if the logging server should be started, defaults to `true`.
-    * It is only invoked on init so it should be overridden in derived classes
-    * if other behavior is desired.
+  /** Determines if the logging server should be started, defaults to `true`. It
+    * is only invoked on init so it should be overridden in derived classes if
+    * other behavior is desired.
     */
   def enableLoggingServer: Boolean = true
 
