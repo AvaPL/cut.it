@@ -16,6 +16,13 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 14.0.1
+    - name: Cache SBT
+      uses: actions/cache@v2
+      with:
+        path: | 
+          ~/.ivy2/cache
+          ~/.sbt
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt', '**/project/**') }}
     - name: Compile and test
       run: sbt test
   scalafmt:
