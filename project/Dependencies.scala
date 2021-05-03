@@ -67,7 +67,7 @@ object Dependencies {
     val elastic4sCore                    = Common.elastic4s
     val elastic4sJsonCirce               = Common.elastic4s
     val elastic4sClientAkka              = Common.elastic4s
-    val catsCore                         = "2.0.0"
+    val catsCore                         = "2.6.0"
     val scalamock                        = "4.4.0"
     val akkaStreamKafkaTestkit           = Common.alpakkaKafka
     val testcontainersScalaScalatest     = Common.testcontainers
