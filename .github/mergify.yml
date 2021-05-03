@@ -1,0 +1,19 @@
+pull_request_rules:
+  - name: Label dependency updates
+    conditions:
+      - base=master
+      - head~=^update/
+    actions:
+      label:
+        add:
+          - dependency-update
+  - name: Merge dependency updates
+    conditions:
+      - base=master
+      - head~=^update/
+      - check-success=compile-and-test
+      - check-success=scalafmt
+    actions:
+      merge:
+        strict: true
+        method: squash
