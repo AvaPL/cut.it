@@ -57,11 +57,11 @@ object Dependencies {
     val circeGeneric                     = Common.circe
     val circeParser                      = Common.circe
     val akkaStream                       = Common.akka
-    val akkaHttp                         = "10.2.0"
+    val akkaHttp                         = "10.2.4"
     val akkaHttpCirce                    = "1.34.0"
     val akkaStreamTestkit                = Common.akka
     val akkaStreamKafka                  = Common.alpakkaKafka
-    val akkaHttpTestkit                  = "10.2.0"
+    val akkaHttpTestkit                  = "10.2.4"
     val scribe                           = "2.7.12"
     val pureconfig                       = "0.13.0"
     val elastic4sCore                    = Common.elastic4s
