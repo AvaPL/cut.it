@@ -46,7 +46,7 @@ object Dependencies {
       val circe          = "0.13.0"
       val akka           = "2.6.9"
       val elastic4s      = "7.9.1"
-      val alpakkaKafka   = "2.0.5"
+      val alpakkaKafka   = "2.0.7"
       val testcontainers = "0.39.3"
     }
 
