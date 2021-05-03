@@ -53,7 +53,7 @@ object Dependencies {
     val scalactic                        = Common.scalatest
     val scalatest                        = Common.scalatest
     val sangriaGraphql                   = "2.0.0"
-    val sangriaCirce                     = "1.3.0"
+    val sangriaCirce                     = "1.3.1"
     val circeGeneric                     = Common.circe
     val circeParser                      = Common.circe
     val akkaStream                       = Common.akka
