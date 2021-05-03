@@ -42,7 +42,7 @@ object Dependencies {
 
   object Version {
     object Common {
-      val scalatest      = "3.2.0"
+      val scalatest      = "3.2.8"
       val circe          = "0.13.0"
       val akka           = "2.6.14"
       val elastic4s      = "7.9.1"
