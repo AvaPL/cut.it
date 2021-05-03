@@ -16,8 +16,7 @@ import org.apache.kafka.common.serialization.{
 
 import scala.concurrent.Future
 
-/**
-  * A class that allows to obtain Kafka producers and consumers.
+/** A class that allows to obtain Kafka producers and consumers.
   */
 case class KafkaConnector(config: KafkaConfig) {
   def producer(implicit
