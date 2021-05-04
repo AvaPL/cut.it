@@ -42,11 +42,11 @@ object Dependencies {
 
   object Version {
     object Common {
-      val scalatest      = "3.2.0"
+      val scalatest      = "3.2.8"
       val circe          = "0.13.0"
-      val akka           = "2.6.9"
+      val akka           = "2.6.14"
       val elastic4s      = "7.9.1"
-      val alpakkaKafka   = "2.0.5"
+      val alpakkaKafka   = "2.0.7"
       val testcontainers = "0.39.3"
     }
 
@@ -57,17 +57,17 @@ object Dependencies {
     val circeGeneric                     = Common.circe
     val circeParser                      = Common.circe
     val akkaStream                       = Common.akka
-    val akkaHttp                         = "10.2.0"
+    val akkaHttp                         = "10.2.4"
     val akkaHttpCirce                    = "1.34.0"
     val akkaStreamTestkit                = Common.akka
     val akkaStreamKafka                  = Common.alpakkaKafka
-    val akkaHttpTestkit                  = "10.2.0"
+    val akkaHttpTestkit                  = "10.2.4"
     val scribe                           = "2.7.13"
-    val pureconfig                       = "0.13.0"
+    val pureconfig                       = "0.15.0"
     val elastic4sCore                    = Common.elastic4s
     val elastic4sJsonCirce               = Common.elastic4s
     val elastic4sClientAkka              = Common.elastic4s
-    val catsCore                         = "2.0.0"
+    val catsCore                         = "2.6.0"
     val scalamock                        = "5.1.0"
     val akkaStreamKafkaTestkit           = Common.alpakkaKafka
     val testcontainersScalaScalatest     = Common.testcontainers
