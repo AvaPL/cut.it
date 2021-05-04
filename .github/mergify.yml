@@ -17,3 +17,9 @@ pull_request_rules:
       merge:
         strict: true
         method: squash
+  - name: Delete head branch after dependency updates merge
+    conditions:
+      - label=dependency-update
+      - merged
+    actions:
+      delete_head_branch:
