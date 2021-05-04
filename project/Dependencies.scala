@@ -62,7 +62,7 @@ object Dependencies {
     val akkaStreamTestkit                = Common.akka
     val akkaStreamKafka                  = Common.alpakkaKafka
     val akkaHttpTestkit                  = "10.2.4"
-    val scribe                           = "2.7.12"
+    val scribe                           = "2.7.13"
     val pureconfig                       = "0.15.0"
     val elastic4sCore                    = Common.elastic4s
     val elastic4sJsonCirce               = Common.elastic4s
