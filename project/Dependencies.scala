@@ -52,7 +52,7 @@ object Dependencies {
 
     val scalactic                        = Common.scalatest
     val scalatest                        = Common.scalatest
-    val sangriaGraphql                   = "2.0.0"
+    val sangriaGraphql                   = "2.0.1"
     val sangriaCirce                     = "1.3.1"
     val circeGeneric                     = Common.circe
     val circeParser                      = Common.circe
