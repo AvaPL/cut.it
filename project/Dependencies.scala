@@ -58,7 +58,7 @@ object Dependencies {
     val circeParser                      = Common.circe
     val akkaStream                       = Common.akka
     val akkaHttp                         = "10.2.4"
-    val akkaHttpCirce                    = "1.34.0"
+    val akkaHttpCirce                    = "1.36.0"
     val akkaStreamTestkit                = Common.akka
     val akkaStreamKafka                  = Common.alpakkaKafka
     val akkaHttpTestkit                  = "10.2.4"
